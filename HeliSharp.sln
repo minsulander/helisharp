@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeliSharpLib", "HeliSharpLib\HeliSharpLib.csproj", "{2F88E947-CC45-4B72-87E8-F95E16304BD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeliSharpTest", "HeliSharpTest\HeliSharpTest.csproj", "{796A15C7-EC82-4073-8BF3-C5E7410ACC91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeliSharpTool", "HeliSharpTool\HeliSharpTool.csproj", "{F8D865E2-20CB-42B3-A494-0FD33EC5283D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F88E947-CC45-4B72-87E8-F95E16304BD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F88E947-CC45-4B72-87E8-F95E16304BD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F88E947-CC45-4B72-87E8-F95E16304BD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F88E947-CC45-4B72-87E8-F95E16304BD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{796A15C7-EC82-4073-8BF3-C5E7410ACC91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{796A15C7-EC82-4073-8BF3-C5E7410ACC91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{796A15C7-EC82-4073-8BF3-C5E7410ACC91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{796A15C7-EC82-4073-8BF3-C5E7410ACC91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8D865E2-20CB-42B3-A494-0FD33EC5283D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8D865E2-20CB-42B3-A494-0FD33EC5283D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8D865E2-20CB-42B3-A494-0FD33EC5283D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8D865E2-20CB-42B3-A494-0FD33EC5283D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 120
+		$1.TabsToSpaces = False
+		$1.EolMarker = Unix
+		$1.inheritsSet = VisualStudio
+		$1.inheritsScope = text/plain
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.IndentSwitchBody = True
+		$2.BeforeMethodDeclarationParentheses = False
+		$2.BeforeMethodCallParentheses = False
+		$2.BeforeConstructorDeclarationParentheses = False
+		$2.BeforeDelegateDeclarationParentheses = False
+		$2.NewParentheses = False
+		$2.SpacesBeforeBrackets = False
+		$2.inheritsSet = Mono
+		$2.inheritsScope = text/x-csharp
+		$2.scope = text/x-csharp
+		StartupItem = CsHeliLib\CsHeliLib.csproj
+	EndGlobalSection
+EndGlobal

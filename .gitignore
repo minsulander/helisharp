@@ -1,0 +1,59 @@
+UnityHeli/Assets/Plugins/CsHeliLib.dll
+UnityHeli/Assets/Plugins/MathNet.Numerics.dll
+UnityHeli/Assets/Plugins/Newtonsoft.Json.dll
+UnityHeli/Assets/Plugins/System.Threading.dll
+UnityHeli/Assets/Plugins/UnityHeliLib.dll
+
+*.o
+*.d
+*.so
+*.dylib
+*.a
+obj
+bin
+doc
+build
+test-results
+HeliLib/Scripts/HeliLibTest
+HeliLib/HeliLibTest
+CMakeCache.txt
+CMakeFiles
+*.cmake
+*.userprefs
+packages
+*.make
+configure
+Makefile.include
+*.pc
+*.pc.in
+config.log
+CsHeli/csheli
+octave-workspace
+.idea*
+TestResult.xml
+
+# =============== #
+# Unity generated #
+# =============== #
+UnityHeli/[Tt]emp/
+UnityHeli/[Oo]bj/
+UnityHeli/[Bb]uild
+UnityHeli/[Ll]ibrary/
+UnityHeli/sysinfo.txt
+UnityHeli/*.app
+UnityHeli/*.exe
+UnityHeli/*_Data/
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+UnityHeli/[Ee]xported[Oo]bj/
+UnityHeli/*.userprefs
+# UnityHeli/*.csproj
+UnityHeli/*.pidb
+UnityHeli/*.suo
+UnityHeli/*.sln*
+UnityHeli/*.user
+UnityHeli/*.unityproj
+UnityHeli/*.booproj
+.vs
