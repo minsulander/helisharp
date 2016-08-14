@@ -1,4 +1,4 @@
-﻿# HeliSharp - a C# library for helicotper flight simulation
+﻿# HeliSharp - a C# library for helicopter flight simulation
 
 Based on the original author's master thesis, originally a C++ project, adapted
 to the new language and runtime platform, and extended from there.
@@ -15,7 +15,7 @@ Some objectives of this library:
 - Code comments should reference scientific literature wherever that is relevant
 
 The above goals have some implications on the development and coding style:
-- Variable names follow the Unity-style (public "raw" variables) for parameters, for
+- Parameter variable names follow the Unity-style (public member variables) for parameters, for
   easy parametrization within the Unity Editor, but parametrization from a JSON file should also work
 - Model states, inputs and outputs should be private variables or properties (so that they don't show up in the Unity Editor)
 - Variable names sometimes use the obfuscated math notation (i.e. greek letters), like Omega_0, in
@@ -43,10 +43,12 @@ Run the tests within an IDE or on the command line:
 ```bash
 make test
 ```
-To see some validation graphs, run:
+To build validation graphs, run:
 ```bash
-./trimdata_compare.sh
+scripts/trimdata_compare.sh
+scripts/simdata_compare.sh
 ```
+and look at the results in the [validation/a109](validation/a109) folder.
 
 ## References and relevant literature
 This is not a complete list of references but rather a reading list for those that are interested.
