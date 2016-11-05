@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2F88E947-CC45-4B72-87E8-F95E16304BD8}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>CsHeliLib</RootNamespace>
+    <RootNamespace>HeliSharp</RootNamespace>
     <AssemblyName>HeliSharp</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
