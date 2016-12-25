@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>HeliSharp</RootNamespace>
     <AssemblyName>HeliSharp</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -46,6 +46,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Common\ForceAssembly.cs" />
     <Compile Include="Common\ForceModel.cs" />
+    <Compile Include="Common\IHelicopterControls.cs" />
     <Compile Include="Components\Airfoil.cs" />
     <Compile Include="Components\InflowModel.cs" />
     <Compile Include="Components\PIDController.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Models\FlightControlSystem.cs" />
     <Compile Include="Models\Fuselage.cs" />
     <Compile Include="Models\GearBox.cs" />
+    <Compile Include="Models\Helicopter.cs" />
     <Compile Include="Models\SingleMainRotorHelicopter.cs" />
     <Compile Include="Models\Rotor.cs" />
     <Compile Include="Models\Stabilizer.cs" />

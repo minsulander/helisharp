@@ -11,118 +11,21 @@ namespace HeliSharp
 	///	downwash on local velocities of submodels, trimming interface, utility functions etc.
 
 	[Serializable]
-	public class SingleMainRotorHelicopter : ForceAssembly
+	public class SingleMainRotorHelicopter : Helicopter
 	{
-		// Control inputs
 		[JsonIgnore]
-		public double Collective { // positive up
-			get { return FCS.CollectiveCommand; }
-			set { FCS.CollectiveCommand = value; }
-		}
-		[JsonIgnore]
-		public double LongCyclic { // positive forward
-			get { return FCS.LongCommand; }
-			set { FCS.LongCommand = value; }
-		}
-		[JsonIgnore]
-		public double LatCyclic { // positive right
-			get { return FCS.LatCommand; }
-			set { FCS.LatCommand = value; }
-		}
-		[JsonIgnore]
-		public double Pedal { // positive right
-			get { return FCS.PedalCommand; }
-			set { FCS.PedalCommand = value; }
-		}
-
-		public override Matrix<double> Rotation {
-			get { return base.Rotation; }
-			set {
-				base.Rotation = value;
-				Attitude = value.EulerAngles();
-			}
-		}
-
-		// Attitude needs to be set from rigid body simulation
-		// phi (roll +right), theta (pitch +down), psi (heading +right)
-
-		private Vector<double> attitude = Vector<double>.Build.Zero3();
-		[JsonIgnore]
-		public Vector<double> Attitude {
-			get {
-				return attitude;
-			}
-			set { 
-				attitude = value;
-				if (attitude[0] > Math.PI) attitude[0] -= 2 * Math.PI;
-				if (attitude[0] < -Math.PI) attitude[0] += 2 * Math.PI;
-				if (attitude[1] > Math.PI) attitude[1] -= 2 * Math.PI;
-				if (attitude[1] < -Math.PI) attitude[1] += 2 * Math.PI;
-				base.Rotation = Matrix<double>.Build.EulerRotation(attitude);
-				Gravity.Rotation = Matrix<double>.Build.EulerRotation(-attitude[0], -attitude[1], -attitude[2]);
-			}
-		}
-		[JsonIgnore]
-		public double RollAngle { // positive right
-			get { return attitude[0]; } 
-			set { attitude[0] = value; }
-		}
-		[JsonIgnore]
-		public double PitchAngle { // positive up
-			get { return attitude[1]; } 
-			set { attitude[1] = value; }
-		}
-		[JsonIgnore]
-		public double Heading { // positive right
-			get { return attitude[2]; }
-			set { attitude[2] = value; }
-		}
-
-		[JsonIgnore]
-		public Vector<double> Wind { get; set; }
-
-		public Vector<double> GroundVelocity {
-			set {
-				Matrix<double> R = Matrix<double>.Build.EulerRotation(attitude);
-				Velocity = value - R * Wind;
-			}
-		}
-		public Vector<double> AbsoluteVelocity {
-			set {
-				GroundVelocity = Gravity.Rotation * value;
-			}
-		}
-
-		[JsonIgnore]
-		public double Height { 
+		public override double Height {
 			get { return MainRotor.HeightAboveGround + MainRotor.Translation[2]; }
 			set { MainRotor.HeightAboveGround = value - MainRotor.Translation[2]; } 
 		}
 
-		private double mass;
-		public double Mass { get { return mass; } set { mass = value; Gravity.Force[2] = mass*9.81; } }
-
-		[JsonIgnore]
-		public Matrix<double> Inertia { get; set; }
-
-		// For serialization
-		[JsonProperty("inertia")]
-		public double[] InertiaD {
-			get { return Inertia.ToColumnWiseArray(); }
-			set { Inertia = Matrix<double>.Build.DenseOfColumnMajor(3, 3, value); }
-		}
-
-
-
-		public FlightControlSystem FCS { get; set; }
-
-		public bool UseEngineModel { get; set; }
-		public GearBox GearBox { get; set; }
-		public Engine Engine { get; set; }
-
 		// Sub-models
 
-		private Rotor mainRotor;
+	    public bool UseEngineModel { get; set; }
+	    public GearBox GearBox { get; set; }
+	    public Engine Engine { get; set; }
+
+	    private Rotor mainRotor;
 		public Rotor MainRotor {
 			get { return mainRotor; }
 			set { mainRotor = value; SetModel("MainRotor", value); } 
@@ -147,23 +50,15 @@ namespace HeliSharp
 			get { return fuselage; }
 			set { fuselage = value; SetModel("Fuselage", value); }
 		}
-		[JsonIgnore]
-		public StaticForce Gravity { get; private set; }
-		[JsonIgnore]
-		public Atmosphere Atmosphere { get; private set; }
 
 		[JsonIgnore]
 		public double PowerRequired { get; private set; }
 
 
-		public SingleMainRotorHelicopter ()
+		public SingleMainRotorHelicopter() : base()
 		{
-			Wind = Vector<double>.Build.Zero3();
 			MainRotor = new Rotor();
 			TailRotor = new Rotor();
-			Gravity = new StaticForce(Vector<double>.Build.Dense3(0, 0, Mass * 9.81));
-			SetModel ("Gravity", Gravity);
-			Atmosphere = new Atmosphere();
 		}
 
 		public SingleMainRotorHelicopter LoadDefault()
@@ -214,59 +109,53 @@ namespace HeliSharp
 				Engine.InitStopped();
 		}
 
-		public override void Update(double dt)
-		{
-			// Update atmospheric properties
-			Atmosphere.Position = Translation;
-			Atmosphere.Update(dt);
-			mainRotor.Density = Atmosphere.Density;
-			tailRotor.Density = Atmosphere.Density;
-			if (fuselage != null) fuselage.Density = Atmosphere.Density;
-			if (horizontalStabilizer != null) horizontalStabilizer.Density = Atmosphere.Density;
-			if (verticalStabilizer != null) verticalStabilizer.Density = Atmosphere.Density;
+	    public override void PreUpdate(double dt)
+	    {
+	        // Update sub-model atmospheric properties
+	        mainRotor.Density = Atmosphere.Density;
+	        tailRotor.Density = Atmosphere.Density;
+	        if (fuselage != null) fuselage.Density = Atmosphere.Density;
+	        if (horizontalStabilizer != null) horizontalStabilizer.Density = Atmosphere.Density;
+	        if (verticalStabilizer != null) verticalStabilizer.Density = Atmosphere.Density;
 
-			// Update FCS
-			FCS.Velocity = Velocity;
-			FCS.AngularVelocity = AngularVelocity;
-			FCS.Attitude = Attitude;
-			FCS.Update(dt);
-			mainRotor.Collective = FCS.Collective;
-			mainRotor.LongCyclic = FCS.LongCyclic;
-			mainRotor.LatCyclic = FCS.LatCyclic;
-			tailRotor.Collective = -FCS.Pedal; // TODO make pedal-collective inversion a parameter
+	        // Update sub-model controls
+	        mainRotor.Collective = FCS.Collective;
+	        mainRotor.LongCyclic = FCS.LongCyclic;
+	        mainRotor.LatCyclic = FCS.LatCyclic;
+	        tailRotor.Collective = -FCS.Pedal; // TODO make pedal-collective inversion a parameter
 
-			// Update engine and drivetrain
-			if (UseEngineModel) {
-                if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeOmega > 1e-5) GearBox.BrakeEnabled = false;
-				GearBox.MainRotorLoad = MainRotor.ShaftTorque;
-				GearBox.TailRotorLoad = TailRotor.ShaftTorque;
-				GearBox.MainRotorInertia = MainRotor.Inertia;
-				GearBox.TailRotorInertia = TailRotor.Inertia;
-				GearBox.Update(dt);
-				Engine.load = GearBox.Load;
-				Engine.inertia = GearBox.Inertia;
-				Engine.Update(dt);
-				GearBox.RotspeedDrive = Engine.rotspeed;
-				MainRotor.RotSpeed = GearBox.MainRotorSpeed;
-				TailRotor.RotSpeed = GearBox.TailRotorSpeed;
-			}
+	        // Update engine and drivetrain
+	        if (UseEngineModel) {
+	            if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeOmega > 1e-5) GearBox.BrakeEnabled = false;
+	            GearBox.MainRotorLoad = MainRotor.ShaftTorque;
+	            GearBox.TailRotorLoad = TailRotor.ShaftTorque;
+	            GearBox.MainRotorInertia = MainRotor.Inertia;
+	            GearBox.TailRotorInertia = TailRotor.Inertia;
+	            GearBox.Update(dt);
+	            Engine.load = GearBox.Load;
+	            Engine.inertia = GearBox.Inertia;
+	            Engine.Update(dt);
+	            GearBox.RotspeedDrive = Engine.rotspeed;
+	            MainRotor.RotSpeed = GearBox.MainRotorSpeed;
+	            TailRotor.RotSpeed = GearBox.TailRotorSpeed;
+	        }
+	    }
 
-			base.Update (dt);
+	    public override void PostUpdate(double dt)
+	    {
+	        // Calculate power required
+	        if (UseEngineModel)
+	            PowerRequired = GearBox.Load * GearBox.RotspeedDrive;
+	        else
+	            PowerRequired = mainRotor.ShaftTorque * mainRotor.RotSpeed + tailRotor.ShaftTorque * tailRotor.RotSpeed
+	                            + 0.1 * 628 * 628; // + gearbox.getFriction()*engine.getDesignRotationSpeed()*engine.getDesignRotationSpeed();
 
-			// Calculate power required
-			if (UseEngineModel)
-				PowerRequired = GearBox.Load * GearBox.RotspeedDrive;
-			else
-				PowerRequired = mainRotor.ShaftTorque * mainRotor.RotSpeed + tailRotor.ShaftTorque * tailRotor.RotSpeed
-					+ 0.1 * 628 * 628; // + gearbox.getFriction()*engine.getDesignRotationSpeed()*engine.getDesignRotationSpeed();
-
-			// Add tail rotor torque and remove torque when clutch is disengaged
-			if (UseEngineModel && !GearBox.engaged)
-				Torque[2] -= MainRotor.Torque[2];
-			else if (TailRotor.RotSpeed > 0.1)
-				Torque[2] += TailRotor.Torque[2] * MainRotor.RotSpeed / TailRotor.RotSpeed;
-		}
-
+	        // Add tail rotor torque and remove torque when clutch is disengaged
+	        if (UseEngineModel && !GearBox.engaged)
+	            Torque[2] -= MainRotor.Torque[2];
+	        else if (TailRotor.RotSpeed > 0.1)
+	            Torque[2] += TailRotor.Torque[2] * MainRotor.RotSpeed / TailRotor.RotSpeed;
+	    }
 
 		public void TrimInit()
 		{
