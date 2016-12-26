@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace HeliSharp
 {
 	[TestFixture]
-	public class SingleMainRotorHelicopterTest
+	public class SingleMainRotorHelicopterTest : HelicopterTest
 	{
 
 		[Test]
@@ -17,36 +17,12 @@ namespace HeliSharp
 			// Trimming means to find the inputs (collective, cyclic, pedal, attitude) that
 			// results in equilibrium, i.e. outputs (forces, moments) are near zero
 			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
-			model.MainRotor.useDynamicInflow = false;
-			model.TailRotor.useDynamicInflow = false;
+		    model.FCS.trimControl = false;
 			model.TrimInit();
 			model.Trim();
 
-			Console.WriteLine("Force after trim " + model.Force.ToStr());
-			Console.WriteLine("Torque after trim " + model.Torque.ToStr());
-
-			Console.WriteLine("Collective " + Math.Round(model.Collective*100) + "%");
-			Console.WriteLine("Longitudinal cyclic " + Math.Round(model.LongCyclic*100) + "%");
-			Console.WriteLine("Lateral cyclic " + Math.Round(model.LatCyclic*100) + "%");
-			Console.WriteLine("Pedal " + Math.Round(model.Pedal*100) + "%");
-			Console.WriteLine("Roll angle " + (model.RollAngle * 180 / Math.PI).ToStr() + " deg");
-			Console.WriteLine("Pitch angle " + (model.PitchAngle * 180 / Math.PI).ToStr() + " deg");
-
-			// Forces and moments should be near-zero
-			Assert.IsTrue(model.Force.Norm (2) < 0.1);
-			Assert.IsTrue(model.Torque.Norm (2) < 0.1);
-
-			// Controls should be reasonable
-			Assert.IsTrue(model.Collective <= 1);
-			Assert.IsTrue(model.Collective >= -1);
-			Assert.IsTrue(model.LongCyclic <= 1);
-			Assert.IsTrue(model.LongCyclic >= -1);
-			Assert.IsTrue(model.LatCyclic <= 1);
-			Assert.IsTrue(model.LatCyclic >= -1);
-			Assert.IsTrue(model.Pedal <= 1);
-			Assert.IsTrue(model.Pedal >= -1);
-
-			// Attitude should be reasonable
+		    LogTrimState(model);
+		    AssertTrimmed(model);
 
 			// Sanity-check: the main-rotor should contribute to most of the upward force,
 			// i.e. be somewhat equal to mass * gravity
@@ -67,30 +43,6 @@ namespace HeliSharp
 			model.TailRotor.useDynamicInflow = false;
 			model.FCS.trimControl = false;
 			TrimSweep(model);
-		}
-
-		public void TrimSweep(SingleMainRotorHelicopter model, double ustart = -20, double uend = 60, double ustep = 1, double v = 0, double w = 0, double h = 1000)
-		{
-			model.Height = h;
-			for (var u = ustart; u <= uend+ustep/2; u += ustep) {
-				Console.WriteLine("Trimming u " + u.ToStr() + " m/s");
-				model.AbsoluteVelocity = Vector<double>.Build.DenseOfArray(new double[] { u, v, w });
-				model.AngularVelocity = Vector<double>.Build.Zero3();
-				try {
-					model.TrimInit();
-					model.Trim();
-
-					Console.WriteLine("  col " + Math.Round(model.Collective*100)
-						+ " lon " + Math.Round(model.LongCyclic*100)
-						+ " lat " + Math.Round(model.LatCyclic*100)
-						+ " ped " + Math.Round(model.Pedal*100)
-						+ " roll " + (model.RollAngle * 180 / Math.PI).ToStr()
-						+ " pitch " + (model.PitchAngle * 180 / Math.PI).ToStr());
-				} catch (TrimmerException e) {
-					Console.WriteLine("  Failed: " + e.Message);
-				}
-
-			}
 		}
 
 		[Test]
@@ -175,6 +127,17 @@ namespace HeliSharp
 			var json = Newtonsoft.Json.JsonConvert.SerializeObject(model, Formatting.Indented);
 			Console.WriteLine(json);
 		}
+
+	    public override Helicopter SetupModelForSimulation()
+	    {
+	        SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+	        model.MainRotor.useDynamicInflow = false;
+	        model.TailRotor.useDynamicInflow = false;
+	        model.FCS.trimControl = false;
+	        model.TrimInit();
+	        model.Trim();
+	        return model;
+	    }
 	}
 }
 

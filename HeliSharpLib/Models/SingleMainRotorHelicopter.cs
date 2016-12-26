@@ -13,12 +13,6 @@ namespace HeliSharp
 	[Serializable]
 	public class SingleMainRotorHelicopter : Helicopter
 	{
-		[JsonIgnore]
-		public override double Height {
-			get { return MainRotor.HeightAboveGround + MainRotor.Translation[2]; }
-			set { MainRotor.HeightAboveGround = value - MainRotor.Translation[2]; } 
-		}
-
 		// Sub-models
 
 	    public bool UseEngineModel { get; set; }
@@ -117,6 +111,7 @@ namespace HeliSharp
 	        if (fuselage != null) fuselage.Density = Atmosphere.Density;
 	        if (horizontalStabilizer != null) horizontalStabilizer.Density = Atmosphere.Density;
 	        if (verticalStabilizer != null) verticalStabilizer.Density = Atmosphere.Density;
+	        mainRotor.HeightAboveGround = Height - mainRotor.Translation[2];
 
 	        // Update sub-model controls
 	        mainRotor.Collective = FCS.Collective;
@@ -157,7 +152,7 @@ namespace HeliSharp
 	            Torque[2] += TailRotor.Torque[2] * MainRotor.RotSpeed / TailRotor.RotSpeed;
 	    }
 
-		public void TrimInit()
+		public override void TrimInit()
 		{
 			MainRotor.beta_0 = 3.0 * Math.PI / 180.0;
 			MainRotor.beta_cos = 0.0;
@@ -176,7 +171,7 @@ namespace HeliSharp
 			Pedal = -0.5;
 		}
 
-		public void Trim()
+		public override void Trim()
 		{
 			bool fcs = FCS.enabled;
 			FCS.enabled = false;
@@ -233,7 +228,7 @@ namespace HeliSharp
 			Gravity.Enabled = gravity;
 		}
 
-		override protected void updateLocalVelocity (ForceModel model)
+		protected override void updateLocalVelocity (ForceModel model)
 		{
 			if (model == mainRotor) {
 				base.updateLocalVelocity(model);

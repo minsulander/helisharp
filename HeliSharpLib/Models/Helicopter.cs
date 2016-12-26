@@ -153,7 +153,7 @@ namespace HeliSharp
         }
 
         [JsonIgnore]
-        public abstract double Height { get; set; }
+        public double Height { get; set; }
 
         protected Helicopter()
         {
@@ -190,5 +190,9 @@ namespace HeliSharp
         {
 
         }
+
+        public abstract void TrimInit();
+        public abstract void Trim();
+
     }
 }

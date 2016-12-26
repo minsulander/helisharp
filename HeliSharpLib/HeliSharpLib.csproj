@@ -57,6 +57,7 @@
     <Compile Include="Models\Fuselage.cs" />
     <Compile Include="Models\GearBox.cs" />
     <Compile Include="Models\Helicopter.cs" />
+    <Compile Include="Models\QuadCopter.cs" />
     <Compile Include="Models\SingleMainRotorHelicopter.cs" />
     <Compile Include="Models\Rotor.cs" />
     <Compile Include="Models\Stabilizer.cs" />

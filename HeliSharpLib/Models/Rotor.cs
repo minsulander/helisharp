@@ -102,7 +102,7 @@ namespace HeliSharp
 			cyclicflap = true;
 			theta_0_max = theta_0_min = theta_sin_max = theta_sin_min = theta_cos_max = theta_cos_min = 0.0;
 			useDynamicInflow = false;
-			trimflow = false;
+			trimflow = true;
 			applyTorque = true;
 
 			// set defaults

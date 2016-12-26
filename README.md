@@ -64,3 +64,7 @@ Links to Amazon where the original text is not available online.
 Not about helicopter/flight simulation but interesting nonetheless:
 - Nico Galoppo. [A presentation on rigid body dynamics simulation](http://www.cs.unc.edu/~lin/COMP768-F07/LEC/rbd1.pdf)
 
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+

@@ -50,10 +50,11 @@
     <Compile Include="Models\AtmosphereTest.cs" />
     <Compile Include="Models\EngineTest.cs" />
     <Compile Include="Models\FlightControlSystemTest.cs" />
+    <Compile Include="Models\HelicopterTest.cs" />
+    <Compile Include="Models\QuadCopterTest.cs" />
     <Compile Include="Models\SingleMainRotorHelicopterTest.cs" />
     <Compile Include="Models\RotorTest.cs" />
     <Compile Include="Models\StabilizerTest.cs" />
-    <Compile Include="SimulationTest.cs" />
     <Compile Include="Utils\MathNetTest.cs" />
     <Compile Include="Utils\ODESolverTest.cs" />
     <Compile Include="Utils\TrimmerTest.cs" />

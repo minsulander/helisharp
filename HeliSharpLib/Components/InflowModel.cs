@@ -91,7 +91,7 @@ namespace HeliSharp
 			if (height/R <= 0.1) {
 				// this shouldn't happen but avoid singularity
 				lambda_i0 = 0.0;
-			} else if (height < 3.0*R) {
+			} else if (height < 3.0*R && lambda_i0 > 1e-5) {
 				/*
 				//double kG = 1/(0.9926+0.0379 * (2*R/height)*(2*R/height) ); // Hayden model (Leishmann pg 260)
 				double kG = (8*height*height/(R*R))/(1+8*height*height/(R*R)); // Mark Dreier pg 236
