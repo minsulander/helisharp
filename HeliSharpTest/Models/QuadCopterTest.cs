@@ -10,7 +10,7 @@ namespace HeliSharp
         [Test]
         public void TorqueDirections()
         {
-            QuadCopter model = new QuadCopter().LoadDefault();
+            QuadCopter model = (QuadCopter) new QuadCopter().LoadDefault();
             //model.Gravity.Enabled = true;
             //model.Collective = 0.5;
             model.Pedal = -1.0;
@@ -29,7 +29,7 @@ namespace HeliSharp
         [Test]
         public void TrimTheModel ()
         {
-            QuadCopter model = new QuadCopter().LoadDefault();
+            QuadCopter model = (QuadCopter) new QuadCopter().LoadDefault();
             model.FCS.trimControl = false;
             model.TrimInit();
             model.Trim();
@@ -41,14 +41,14 @@ namespace HeliSharp
         [Test]
         public void TestTrimSweep()
         {
-            QuadCopter model = new QuadCopter().LoadDefault();
+            QuadCopter model = (QuadCopter) new QuadCopter().LoadDefault();
             model.FCS.trimControl = false;
             TrimSweep(model);
         }
 
         public override Helicopter SetupModelForSimulation()
         {
-            QuadCopter model = new QuadCopter().LoadDefault();
+            QuadCopter model = (QuadCopter) new QuadCopter().LoadDefault();
             model.FCS.trimControl = false;
             model.TrimInit();
             model.Trim();

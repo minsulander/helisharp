@@ -16,7 +16,7 @@ namespace HeliSharp
 		{
 			// Trimming means to find the inputs (collective, cyclic, pedal, attitude) that
 			// results in equilibrium, i.e. outputs (forces, moments) are near zero
-			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+			SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
 		    model.FCS.trimControl = false;
 			model.TrimInit();
 			model.Trim();
@@ -38,7 +38,7 @@ namespace HeliSharp
 		[Test]
 		public void TestTrimSweep()
 		{
-			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+			SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
 			model.MainRotor.useDynamicInflow = false;
 			model.TailRotor.useDynamicInflow = false;
 			model.FCS.trimControl = false;
@@ -48,7 +48,7 @@ namespace HeliSharp
 		[Test]
 		public void TestStabilizersForceDirections()
 		{
-			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+			SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
 			model.MainRotor.useDynamicInflow = false;
 			model.TailRotor.useDynamicInflow = false;
 			// Trim going downward and right
@@ -82,7 +82,7 @@ namespace HeliSharp
 		[Test]
 		public void TestFuselageForceDirections()
 		{
-			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+			SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
 			model.MainRotor.useDynamicInflow = false;
 			model.TailRotor.useDynamicInflow = false;
 			model.AbsoluteVelocity = Vector<double>.Build.DenseOfArray(new double[] { 0, 0, 0 });
@@ -107,7 +107,8 @@ namespace HeliSharp
 		[Test]
 		public void TestSerialize()
 		{
-			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+			SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
+		    Console.WriteLine(model.Inertia[0,0]);
 
 			// One way to skin a cat...
 		    /*
@@ -126,11 +127,14 @@ namespace HeliSharp
 		    // And another way...
 			var json = Newtonsoft.Json.JsonConvert.SerializeObject(model, Formatting.Indented);
 			Console.WriteLine(json);
+		    model = JsonConvert.DeserializeObject<SingleMainRotorHelicopter>(json);
+		    Assert.IsNotNull(model.Inertia[0, 0]);
+		    Console.WriteLine(model.Inertia[0,0]);
 		}
 
 	    public override Helicopter SetupModelForSimulation()
 	    {
-	        SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+	        SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
 	        model.MainRotor.useDynamicInflow = false;
 	        model.TailRotor.useDynamicInflow = false;
 	        model.FCS.trimControl = false;

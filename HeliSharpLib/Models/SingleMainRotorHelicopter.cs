@@ -55,7 +55,7 @@ namespace HeliSharp
 			TailRotor = new Rotor();
 		}
 
-		public SingleMainRotorHelicopter LoadDefault()
+		public override Helicopter LoadDefault()
 		{
 			Mass = 2450;
 			Inertia = Matrix<double>.Build.DenseOfArray (new double[,] {

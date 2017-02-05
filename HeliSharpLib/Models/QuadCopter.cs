@@ -17,7 +17,7 @@ namespace HeliSharp
             SetModel("Rotor3", Rotors[3]);
         }
 
-        public QuadCopter LoadDefault()
+        public override Helicopter LoadDefault()
         {
             Mass = 750;
             Inertia = Matrix<double>.Build.DenseOfDiagonalArray(3, 3, new double[] {1000, 3000, 3000});

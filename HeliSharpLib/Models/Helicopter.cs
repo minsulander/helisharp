@@ -126,7 +126,7 @@ namespace HeliSharp
         [JsonProperty("inertia")]
         public double[] InertiaD
         {
-            get { return Inertia.ToColumnWiseArray(); }
+            get { return Inertia?.ToColumnWiseArray(); }
             set { Inertia = Matrix<double>.Build.DenseOfColumnMajor(3, 3, value); }
         }
 
@@ -163,6 +163,8 @@ namespace HeliSharp
             Atmosphere = new Atmosphere();
 
         }
+
+        public abstract Helicopter LoadDefault();
 
         public override void Update(double dt)
         {

@@ -42,7 +42,7 @@ namespace CsHeli
 
 		public override int Run(string[] remainingArguments)
 		{
-			SingleMainRotorHelicopter model = new SingleMainRotorHelicopter().LoadDefault();
+			SingleMainRotorHelicopter model = (SingleMainRotorHelicopter) new SingleMainRotorHelicopter().LoadDefault();
 			model.MainRotor.useDynamicInflow = false; // TODO optional
 			model.TailRotor.useDynamicInflow = false;
 			model.FCS.trimControl = false;
