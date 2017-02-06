@@ -6,7 +6,7 @@ namespace HeliSharp
     [Serializable]
     public class QuadCopter : Helicopter
     {
-        public Rotor[] Rotors { get; } = new Rotor[4];
+        public override Rotor[] Rotors { get; } = new Rotor[4];
 
         public QuadCopter()
         {

@@ -15,6 +15,8 @@ namespace HeliSharp
 	{
 		// Sub-models
 
+	    public override Rotor[] Rotors { get { return new Rotor[] {MainRotor, TailRotor}; } }
+
 	    public bool UseEngineModel { get; set; }
 	    public GearBox GearBox { get; set; }
 	    public Engine Engine { get; set; }

@@ -9,6 +9,9 @@ namespace HeliSharp
 
         /// Abstract base class for all helicopter types
 
+        [JsonIgnore]
+        public abstract Rotor[] Rotors { get; }
+
         // Control
 
         public FlightControlSystem FCS { get; set; }
