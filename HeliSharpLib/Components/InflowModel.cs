@@ -3,7 +3,7 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace HeliSharp
 {
-	public class InflowModel
+ 	public class InflowModel
 	{
 
 		/// Simple linear model for uniform inflow over a helicopter rotor.

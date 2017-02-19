@@ -77,6 +77,7 @@ namespace HeliSharp
 		public bool useDynamicInflow;			// Use the dynamic inflow model?
 		public bool applyTorque;				// Apply rotor torque?
 
+        [NonSerialized]
 		private InflowModel inflow;
 		private double flapIterationTolerance = 1e-5;
 		private int maxFlapIterations = 50;
@@ -144,6 +145,39 @@ namespace HeliSharp
 			useDynamicInflow = true;
 			return this;
 		}
+
+        public void CopyParameters(Rotor r) {
+            Nb = r.Nb;
+            rotdir = r.rotdir;
+            theta_0_max = r.theta_0_max;
+            theta_0_min = r.theta_0_min;
+            theta_cos_max = r.theta_cos_max;
+            theta_cos_min = r.theta_cos_min;
+            theta_sin_max = r.theta_sin_max;
+            theta_sin_min = r.theta_sin_min;
+            R = r.R;
+            B = r.B;
+            R0 = r.R0;
+            c = r.c;
+            k = r.k;
+            a = r.a;
+            cl0 = r.cl0;
+            cd0 = r.cd0;
+            e = r.e;
+            theta_beta = r.theta_beta;
+            I_beta = r.I_beta;
+            k_beta = r.k_beta;
+            designOmega = r.designOmega;
+            J0 = r.J0;
+            cyclicflap = r.cyclicflap;
+            useDynamicInflow = r.useDynamicInflow;
+            applyTorque = r.applyTorque;
+            RotSpeed = r.RotSpeed;
+            Inertia = r.Inertia;
+            Collective = r.Collective;
+            LatCyclic = r.LatCyclic;
+            LongCyclic = r.LongCyclic;
+        }
 
 		public Rotor LoadDefaultTailRotor ()
 		{
