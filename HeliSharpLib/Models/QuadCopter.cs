@@ -22,8 +22,7 @@ namespace HeliSharp
             Mass = 750;
             Inertia = Matrix<double>.Build.DenseOfDiagonalArray(3, 3, new double[] {1000, 3000, 3000});
 
-            foreach (var rotor in Rotors)
-            {
+            foreach (var rotor in Rotors) {
                 rotor.LoadDefaultTailRotor();
             }
             Rotors[0].Translation = Vector<double>.Build.DenseOfArray(new double[] { 2, 2, -1 });
@@ -34,7 +33,21 @@ namespace HeliSharp
             Rotors[1].rotdir = Rotors[3].rotdir = -1;
 
             FCS = new FlightControlSystem().LoadDefault();
+            Engine = new Engine().LoadDefault();
+            GearBox = new GearBox().LoadDefault();
             return this;
+        }
+
+        public override void InitEngine(bool running) {
+            UseEngineModel = true;
+            GearBox.MainRotorRatio = Engine.Omega0 / Rotors[0].designOmega;
+            if (running) {
+                foreach (var rotor in Rotors) {
+                    rotor.RotSpeed = rotor.designOmega;
+                }
+                Engine.Init(600);
+            } else
+                Engine.InitStopped();
         }
 
         public override void PreUpdate(double dt)
@@ -60,6 +73,27 @@ namespace HeliSharp
                 if (rotor.Collective > 1.0) rotor.Collective = 1.0;
                 if (rotor.Collective < -1.0) rotor.Collective = -1.0;
             }
+
+            // Update engine and drivetrain
+            if (UseEngineModel) {
+                if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeOmega > 1e-5) GearBox.BrakeEnabled = false;
+                GearBox.MainRotorLoad = 0;
+                GearBox.MainRotorInertia = 0;
+                foreach (var rotor in Rotors) {
+                    GearBox.MainRotorLoad += rotor.ShaftTorque;
+                    GearBox.MainRotorInertia += rotor.Inertia;
+                }
+                GearBox.TailRotorLoad = 0;
+                GearBox.TailRotorInertia = 0;
+                GearBox.Update(dt);
+                Engine.load = GearBox.Load;
+                Engine.inertia = GearBox.Inertia;
+                Engine.Update(dt);
+                GearBox.RotspeedDrive = Engine.rotspeed;
+                foreach (var rotor in Rotors) {
+                    rotor.RotSpeed = GearBox.MainRotorSpeed;
+                }
+            }
         }
 
         public override void TrimInit()
@@ -84,6 +118,8 @@ namespace HeliSharp
             FCS.enabled = false;
             bool useDynamicInflow = Rotors[0].useDynamicInflow;
             foreach (var rotor in Rotors) rotor.useDynamicInflow = false;
+            bool engineModel = UseEngineModel;
+            UseEngineModel = false;
             bool gravity = Gravity.Enabled;
             Gravity.Enabled = true;
 
@@ -126,6 +162,7 @@ namespace HeliSharp
             }
             FCS.enabled = fcs;
             foreach (var rotor in Rotors) rotor.useDynamicInflow = useDynamicInflow;
+            UseEngineModel = engineModel;
             Gravity.Enabled = gravity;
         }
 

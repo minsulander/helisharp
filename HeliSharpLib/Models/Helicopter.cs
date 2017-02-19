@@ -12,9 +12,12 @@ namespace HeliSharp
         [JsonIgnore]
         public abstract Rotor[] Rotors { get; }
 
-        // Control
+        public virtual FlightControlSystem FCS { get; set; }
+        public bool UseEngineModel { get; set; }
+        public virtual Engine Engine { get; set; }
+        public virtual GearBox GearBox { get; set; }
 
-        public FlightControlSystem FCS { get; set; }
+        // Control
 
         [JsonIgnore]
         public double Collective
@@ -168,6 +171,8 @@ namespace HeliSharp
         }
 
         public abstract Helicopter LoadDefault();
+
+        public abstract void InitEngine(bool running);
 
         public override void Update(double dt)
         {

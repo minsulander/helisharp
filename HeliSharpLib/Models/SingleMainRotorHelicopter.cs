@@ -17,10 +17,6 @@ namespace HeliSharp
 
 	    public override Rotor[] Rotors { get { return new Rotor[] {MainRotor, TailRotor}; } }
 
-	    public bool UseEngineModel { get; set; }
-	    public GearBox GearBox { get; set; }
-	    public Engine Engine { get; set; }
-
 	    private Rotor mainRotor;
 		public Rotor MainRotor {
 			get { return mainRotor; }
@@ -93,7 +89,7 @@ namespace HeliSharp
 			return this;
 		}
 
-		public void InitEngine(bool running) {
+		public override void InitEngine(bool running) {
 			UseEngineModel = true;
 			GearBox.MainRotorRatio = Engine.Omega0 / MainRotor.designOmega;
 			GearBox.TailRotorRatio = Engine.Omega0 / TailRotor.designOmega;
