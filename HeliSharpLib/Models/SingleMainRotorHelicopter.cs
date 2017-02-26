@@ -37,11 +37,6 @@ namespace HeliSharp
 			get { return verticalStabilizer; }
 			set { verticalStabilizer = value; SetModel("VerticalStabilizer", value); }
 		}
-		private Fuselage fuselage;
-		public Fuselage Fuselage {
-			get { return fuselage; }
-			set { fuselage = value; SetModel("Fuselage", value); }
-		}
 
 		[JsonIgnore]
 		public double PowerRequired { get; private set; }
@@ -80,7 +75,6 @@ namespace HeliSharp
 
 			Fuselage = new Fuselage().LoadDefault();
 			Fuselage.Translation = Vector<double>.Build.DenseOfArray(new double[] { 0.0178, 0, 0.0127 });
-			Fuselage.mrdistance = MainRotor.Translation - Fuselage.Translation;
 
 			FCS = new FlightControlSystem().LoadDefault();
 			Engine = new Engine().LoadDefault();
@@ -106,7 +100,7 @@ namespace HeliSharp
 	        // Update sub-model atmospheric properties
 	        mainRotor.Density = Atmosphere.Density;
 	        tailRotor.Density = Atmosphere.Density;
-	        if (fuselage != null) fuselage.Density = Atmosphere.Density;
+	        if (Fuselage != null) Fuselage.mrdistance = MainRotor.Translation - Fuselage.Translation;
 	        if (horizontalStabilizer != null) horizontalStabilizer.Density = Atmosphere.Density;
 	        if (verticalStabilizer != null) verticalStabilizer.Density = Atmosphere.Density;
 	        mainRotor.HeightAboveGround = Height - mainRotor.Translation[2];

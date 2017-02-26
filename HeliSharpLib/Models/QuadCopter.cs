@@ -35,6 +35,7 @@ namespace HeliSharp
             FCS = new FlightControlSystem().LoadDefault();
             Engine = new Engine().LoadDefault();
             GearBox = new GearBox().LoadDefault();
+            Fuselage = new Fuselage();
             return this;
         }
 
@@ -80,7 +81,7 @@ namespace HeliSharp
                 GearBox.MainRotorLoad = 0;
                 GearBox.MainRotorInertia = 0;
                 foreach (var rotor in Rotors) {
-                    GearBox.MainRotorLoad += rotor.ShaftTorque;
+                    GearBox.MainRotorLoad += Math.Abs(rotor.ShaftTorque);
                     GearBox.MainRotorInertia += rotor.Inertia;
                 }
                 GearBox.TailRotorLoad = 0;

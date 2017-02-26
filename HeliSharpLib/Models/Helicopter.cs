@@ -16,6 +16,11 @@ namespace HeliSharp
         public bool UseEngineModel { get; set; }
         public virtual Engine Engine { get; set; }
         public virtual GearBox GearBox { get; set; }
+        private Fuselage fuselage;
+        public Fuselage Fuselage {
+            get { return fuselage; }
+            set { fuselage = value; SetModel("Fuselage", value); }
+        }
 
         // Control
 
@@ -179,6 +184,7 @@ namespace HeliSharp
             // Update atmospheric properties
             Atmosphere.Position = Translation;
             Atmosphere.Update(dt);
+            if (Fuselage != null) Fuselage.Density = Atmosphere.Density;
 
             // Update FCS
             FCS.Velocity = Velocity;
