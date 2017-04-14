@@ -9,6 +9,8 @@ namespace HeliSharp
 
         /// Abstract base class for all helicopter types
 
+        public JacobianTrimmer Trimmer { get; set; } = new JacobianTrimmer();
+
         [JsonIgnore]
         public abstract Rotor[] Rotors { get; }
 

@@ -14,10 +14,15 @@ namespace HeliSharp
 		// Parameters
 		public bool enabled = true;
 		public bool trimControl = true;
+        public bool verticalRateControl = false;
+        public bool attitudeControl = false;
+        public bool positionControl = false;
+        public double nominalPitchAngle = 0.5; // about 30 deg
+        public double nominalRollAngle = 0.5;
 		public double longExpo = 1, latExpo = 1, pedalExpo = 1;
 		public double yawDamperVelocity1, yawDamperVelocity2;
 
-		public PIDController pitchRatePID, rollRatePID, yawRatePID, pitchPID, rollPID;
+		public PIDController pitchRatePID, rollRatePID, yawRatePID, verticalRatePID, pitchPID, rollPID, longitudinalPID, lateralPID;
 
 		// Inputs
 		[JsonIgnore]
@@ -59,46 +64,56 @@ namespace HeliSharp
 			TrimAttitude = Vector<double>.Build.Zero3();
 		}
 
-		public FlightControlSystem LoadDefault() {
-			pitchRatePID = new PIDController() {
-				kp = 0.5,
-				ki = 0.1,
-				kd = 0.05,
-				integratorLimit = 0.5,
-				desiredScale = 0,
-				outputLimit = 0.3
-			};
-			rollRatePID = new PIDController() {
-				kp = 0.5,
-				ki = 0.1,
-				kd = 0.05,
-				integratorLimit = 0.5,
-				desiredScale = 0,
-				outputLimit = 0.3,
-			};
-			yawRatePID = new PIDController() {
-				kp = 2.0,
-				ki = 1.5,
-				kd = 0,
-				integratorLimit = 0.5,
-				outputLimit = 1,
-			};
-			pitchPID = new PIDController() {
-				kp = 1.0,
-				ki = 0.3,
-				kd = 0.01,
-				integratorLimit = 0.5,
-				desiredScale = 0.5236, // 30 deg
-				outputLimit = 0.25
-			};
-			rollPID = new PIDController() {
-				kp = 1.0,
-				ki = 0.3,
-				kd = 0.01,
-				integratorLimit = 1,
-				desiredScale = 0.5236, // 30 deg
-				outputLimit = 0.25
-			};
+        public FlightControlSystem LoadDefault() {
+            pitchRatePID = new PIDController() {
+                kp = 0.5,
+                ki = 0.1,
+                kd = 0.05,
+                integratorLimit = 0.5,
+                desiredScale = 0,
+                outputLimit = 0.3
+            };
+            rollRatePID = new PIDController() {
+                kp = 0.5,
+                ki = 0.1,
+                kd = 0.05,
+                integratorLimit = 0.5,
+                desiredScale = 0,
+                outputLimit = 0.3,
+            };
+            yawRatePID = new PIDController() {
+                kp = 2.0,
+                ki = 1.5,
+                kd = 0,
+                integratorLimit = 0.5,
+                outputLimit = 1,
+            };
+            verticalRatePID = new PIDController() {
+                kp = 1.0,
+                ki = 0.1,
+                kd = 0,
+                integratorLimit = 0.5,
+                desiredScale = 5,
+                outputLimit = 0.5,
+            };
+            pitchPID = new PIDController() {
+                kp = 1.0,
+                ki = 0.3,
+                kd = 0.01,
+                integratorLimit = 0.5,
+                desiredScale = 1,
+                outputLimit = 0.25
+            };
+            rollPID = new PIDController() {
+                kp = 1.0,
+                ki = 0.3,
+                kd = 0.01,
+                integratorLimit = 1,
+                desiredScale = 1,
+                outputLimit = 0.25
+            };
+            longitudinalPID = new PIDController() { };
+            lateralPID = new HeliSharp.PIDController() { };
 			yawDamperVelocity1 = 10.0;
 			yawDamperVelocity2 = 20.0;
 			return this;
@@ -131,12 +146,29 @@ namespace HeliSharp
 			if (rollRatePID != null) {
 				LatCyclic += rollRatePID.Calculate(dt, LatCommand, AngularVelocity.x());
 			}
-			if (pitchPID != null) {
-				LongCyclic -= pitchPID.Calculate(dt, TrimAttitude.y() - LongCommand, Attitude.y());
-			}
-			if (rollPID != null) {
-				LatCyclic += rollPID.Calculate(dt, TrimAttitude.x() + LatCommand, Attitude.x());
-			}
+            if (verticalRateControl && verticalRatePID != null) {
+                Collective += verticalRatePID.Calculate(dt, CollectiveCommand, -Velocity.z());
+            }
+            if (attitudeControl) {
+                var desiredPitchAngle = TrimAttitude.y() - LongCommand * nominalPitchAngle;
+                var desiredRollAngle = TrimAttitude.x() + LatCommand * nominalRollAngle;
+
+                if (positionControl) {
+                    if (longitudinalPID != null) {
+                        desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, Velocity.x()) * nominalPitchAngle;
+                    }
+                    if (lateralPID != null) {
+                        desiredRollAngle += lateralPID.Calculate(dt, LatCommand, Velocity.y()) * nominalRollAngle;
+                    }
+                }
+
+                if (pitchPID != null) {
+                    LongCyclic -= pitchPID.Calculate(dt, desiredPitchAngle, Attitude.y());
+                }
+                if (rollPID != null) {
+                    LatCyclic += rollPID.Calculate(dt, desiredRollAngle, Attitude.x());
+                }
+            }
 			if (Attitude != null && Math.Abs(Attitude.x()) < MAX_ROLL_FOR_YAW_CONTROL) {
 				double yawscale = 1.0;
 				if (yawRatePID != null) {

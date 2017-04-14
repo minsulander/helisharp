@@ -128,43 +128,52 @@ namespace HeliSharp
                 Collective, LatCyclic, LongCyclic, Pedal, Attitude[0], Attitude[1]
             });
 
-            new JacobianTrimmer().Trim(
-                initialGuess,
-                Vector<double>.Build.DenseOfArray (new double[] { 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3 }),
-                delegate (Vector<double> x) {
-                    // Set input variables from input vector, x=(t0 ts tc tp phi theta)
-                    Collective = x[0];
-                    LongCyclic = x[1];
-                    LatCyclic = x[2];
-                    Pedal = x[3];
-                    Attitude = Vector<double>.Build.DenseOfArray(new double[] { x[4], x[5], Attitude[2] });
-                    // Update
-                    for (int i = 0; i < 10; i++) {
-                        Update(0.01);
-                    }
-                    // Set output vector
-                    return Vector<double>.Build.DenseOfArray (new double[] {
+            try {
+                Trimmer.Trim(
+                    initialGuess,
+                    Vector<double>.Build.DenseOfArray(new double[] { 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3 }),
+                    delegate (Vector<double> x) {
+                        // Set input variables from input vector, x=(t0 ts tc tp phi theta)
+                        Collective = x[0];
+                        LongCyclic = x[1];
+                        LatCyclic = x[2];
+                        Pedal = x[3];
+                        Attitude = Vector<double>.Build.DenseOfArray(new double[] { x[4], x[5], Attitude[2] });
+                        // Update
+                        for (int i = 0; i < 10; i++) {
+                            Update(0.01);
+                        }
+                        // Set output vector
+                        return Vector<double>.Build.DenseOfArray(new double[] {
                         Force[0], Force[1], Force[2],
                         Torque[0], Torque[1], Torque[2]
-                    });
-                }
-            );
+                        });
+                    }
+                );
 
-            FCS.TrimCollective = Collective;
-            FCS.TrimLongCyclic = LongCyclic;
-            FCS.TrimLatCyclic = LatCyclic;
-            FCS.TrimPedal = Pedal;
-            FCS.TrimAttitude = Attitude.Clone();
-            if (FCS.trimControl) {
-                FCS.CollectiveCommand = 0;
-                FCS.LongCommand = 0;
-                FCS.LatCommand = 0;
-                FCS.PedalCommand = 0;
+                FCS.TrimCollective = Collective;
+                FCS.TrimLongCyclic = LongCyclic;
+                FCS.TrimLatCyclic = LatCyclic;
+                FCS.TrimPedal = Pedal;
+                FCS.TrimAttitude = Attitude.Clone();
+                if (FCS.trimControl) {
+                    FCS.CollectiveCommand = 0;
+                    FCS.LongCommand = 0;
+                    FCS.LatCommand = 0;
+                    FCS.PedalCommand = 0;
+                }
+            } catch (TrimmerException e) {
+                Collective = initialGuess[0];
+                LatCyclic = initialGuess[1];
+                LongCyclic = initialGuess[2];
+                Attitude = Vector<double>.Build.DenseOfArray(new double[] { initialGuess[3], initialGuess[4], Attitude[2] });
+                throw e;
+            } finally {
+                FCS.enabled = fcs;
+                foreach (var rotor in Rotors) rotor.useDynamicInflow = useDynamicInflow;
+                UseEngineModel = engineModel;
+                Gravity.Enabled = gravity;
             }
-            FCS.enabled = fcs;
-            foreach (var rotor in Rotors) rotor.useDynamicInflow = useDynamicInflow;
-            UseEngineModel = engineModel;
-            Gravity.Enabled = gravity;
         }
 
     }
