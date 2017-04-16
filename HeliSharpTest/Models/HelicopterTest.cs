@@ -129,7 +129,7 @@ namespace HeliSharp
             var trimRollAngle = model.RollAngle;
 
             model.LatCyclic = 1.0;
-            Simulate(body, 1.0);
+            Simulate(body, 0.1);
             LogSimulationState(body);
 
             Assert.IsTrue(model.RollAngle > trimRollAngle);
@@ -146,7 +146,7 @@ namespace HeliSharp
             var trimRollAngle = model.RollAngle;
 
             model.LatCyclic = -1.0;
-            Simulate(body, 1.0);
+            Simulate(body, 0.1);
             LogSimulationState(body);
 
             Assert.IsTrue(model.RollAngle < trimRollAngle);
