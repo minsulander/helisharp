@@ -17,10 +17,15 @@ namespace HeliSharp
 		// Inputs
 		[JsonIgnore]
 		public double Density { get; set; }							// Air density input port
+	    [JsonIgnore]
 		public double Collective { get; set; }						// Collective control input port, positive up
+	    [JsonIgnore]
 		public double LongCyclic { get; set; }						// Longitudinal cyclic control input port, positive forward
+	    [JsonIgnore]
 		public double LatCyclic { get; set; }						// Lateral cyclic control input port, positive right
+	    [JsonIgnore]
 		public double RotSpeed { get; set; }						// Rotational speed input port
+	    [JsonIgnore]
 		public double HeightAboveGround { get; set; }				// Height above ground - for ground effect
 
 		// Outputs
@@ -241,9 +246,9 @@ namespace HeliSharp
 
 
 			// Constants depending on rotation speed
-			double M_betacos=-I_beta*square((RotSpeed))*3*e/(2*(1-e))*2;
-			double R_betasin=-I_beta*square((RotSpeed))*3*e/(2*(1-e))*2;
-			double lambda_beta=Math.Sqrt(k2+k_beta/(square(RotSpeed)*I_beta));
+			double M_betacos=-I_beta*square(Omega)*3*e/(2*(1-e))*2;
+			double R_betasin=-I_beta*square(Omega)*3*e/(2*(1-e))*2;
+			double lambda_beta=Math.Sqrt(k2+k_beta/(square(Omega)*I_beta));
 
 			// Get control angles based on normalized inputs (from input ports) and min/max values (from parameters)
 			double theta_0, theta_sin, theta_cos;

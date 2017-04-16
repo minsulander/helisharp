@@ -14,9 +14,9 @@ namespace HeliSharp
 		// Parameters
 		public bool enabled = true;
 		public bool trimControl = true;
-        public bool verticalRateControl = false;
-        public bool attitudeControl = false;
-        public bool positionControl = false;
+        public bool verticalRateControl = true;
+        public bool attitudeControl = true;
+        public bool positionControl = true;
         public double nominalPitchAngle = 0.5; // about 30 deg
         public double nominalRollAngle = 0.5;
 		public double longExpo = 1, latExpo = 1, pedalExpo = 1;
@@ -93,27 +93,40 @@ namespace HeliSharp
                 ki = 0.1,
                 kd = 0,
                 integratorLimit = 0.5,
-                desiredScale = 5,
+                desiredScale = 15,
                 outputLimit = 0.5,
             };
             pitchPID = new PIDController() {
-                kp = 1.0,
-                ki = 0.3,
+                kp = 2.0,
+                ki = 0.5,
                 kd = 0.01,
                 integratorLimit = 0.5,
                 desiredScale = 1,
                 outputLimit = 0.25
             };
             rollPID = new PIDController() {
-                kp = 1.0,
-                ki = 0.3,
+                kp = 2.0,
+                ki = 0.5,
                 kd = 0.01,
                 integratorLimit = 1,
                 desiredScale = 1,
                 outputLimit = 0.25
             };
-            longitudinalPID = new PIDController() { };
-            lateralPID = new HeliSharp.PIDController() { };
+            longitudinalPID = new PIDController() {
+                kp = 0.05,
+                ki = 0.01,
+                kd = 0.005,
+                outputLimit = 0.5,
+                integratorLimit = 1,
+                desiredScale = 10,
+            };
+            lateralPID = new PIDController() {
+                kp = 0.1,
+                ki = 0.01,
+                outputLimit = 0.5,
+                integratorLimit = 1,
+                desiredScale = 10,
+            };
 			yawDamperVelocity1 = 10.0;
 			yawDamperVelocity2 = 20.0;
 			return this;
