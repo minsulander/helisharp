@@ -122,7 +122,7 @@ namespace HeliSharp
 	            Engine.load = GearBox.Load;
 	            Engine.inertia = GearBox.Inertia;
 	            Engine.Update(dt);
-	            GearBox.RotspeedDrive = Engine.rotspeed;
+	            GearBox.RotspeedDrive = Engine.RotSpeed;
 	            MainRotor.RotSpeed = GearBox.MainRotorSpeed;
 	            TailRotor.RotSpeed = GearBox.TailRotorSpeed;
 	        }

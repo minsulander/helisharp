@@ -26,7 +26,7 @@ namespace HeliSharp
 
 		// Outputs
 		[JsonIgnore]
-		public double rotspeed;
+		public double RotSpeed { get; set; }
 
 		// Parameters
 		public double K_eng, tao_eng, J0, Kp, Ki, Kd, Pmax, intmax, idleRatio; // parameters
@@ -74,7 +74,7 @@ namespace HeliSharp
 			Qeng = load = Q0;
 			Omega = Omega0;
 			dOmega = 0;
-			rotspeed = Omega;
+			RotSpeed = Omega;
 			phase = Phase.RUN;
 			throttle = 1.0;
 			Solver = new RK4Solver (ODEFunction, 0, Vector<double>.Build.DenseOfArray (new double[] { Q0, 0, 0 }));
@@ -84,7 +84,7 @@ namespace HeliSharp
 		public void InitStopped() {
 			Qeng = Omega = dOmega = 0;
 			load = 0;
-			rotspeed = 0;
+			RotSpeed = 0;
 			phase = Phase.CUTOFF;
 			throttle = 0;
 			Solver = new RK4Solver (ODEFunction, 0, Vector<double>.Build.DenseOfArray (new double[] { 0, 0, 0 }));
@@ -129,7 +129,7 @@ namespace HeliSharp
 					Solver.State[2] = -intmax;
 			}
 			// Set output ports
-			rotspeed = Omega;
+			RotSpeed = Omega;
 		}
 
 		public Vector<double> ODEFunction (double t, Vector<double> state)
