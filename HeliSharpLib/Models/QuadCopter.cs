@@ -29,8 +29,8 @@ namespace HeliSharp
             Rotors[1].Translation = Vector<double>.Build.DenseOfArray(new double[] { -2, 2, -1 });
             Rotors[2].Translation = Vector<double>.Build.DenseOfArray(new double[] { -2, -2, -1 });
             Rotors[3].Translation = Vector<double>.Build.DenseOfArray(new double[] { 2, -2, -1 });
-            Rotors[0].rotdir = Rotors[2].rotdir = 1;
-            Rotors[1].rotdir = Rotors[3].rotdir = -1;
+            Rotors[0].direction = Rotors[2].direction = Rotor.Direction.CounterClockwise;
+            Rotors[1].direction = Rotors[3].direction = Rotor.Direction.Clockwise;
 
             FCS = new FlightControlSystem().LoadDefault();
             Engine = new Engine().LoadDefault();
@@ -41,7 +41,7 @@ namespace HeliSharp
 
         public override void InitEngine(bool running) {
             UseEngineModel = true;
-            GearBox.MainRotorRatio = Engine.Omega0 / Rotors[0].designOmega;
+            GearBox.MainRotorRatio = Engine.designRPM / Rotors[0].designRPM;
             if (running) {
                 foreach (var rotor in Rotors) {
                     rotor.RotSpeed = rotor.designOmega;
@@ -68,8 +68,8 @@ namespace HeliSharp
                 if (rotor.Translation.x() < 0) rotor.Collective += FCS.LongCyclic;
                 if (rotor.Translation.y() > 0) rotor.Collective -= FCS.LatCyclic;
                 if (rotor.Translation.y() < 0) rotor.Collective += FCS.LatCyclic;
-                if (rotor.rotdir > 0) rotor.Collective += FCS.Pedal;
-                if (rotor.rotdir < 0) rotor.Collective -= FCS.Pedal;
+                if (rotor.direction == Rotor.Direction.CounterClockwise) rotor.Collective += FCS.Pedal;
+                if (rotor.direction == Rotor.Direction.Clockwise) rotor.Collective -= FCS.Pedal;
 
                 if (rotor.Collective > 1.0) rotor.Collective = 1.0;
                 if (rotor.Collective < -1.0) rotor.Collective = -1.0;
@@ -77,7 +77,7 @@ namespace HeliSharp
 
             // Update engine and drivetrain
             if (UseEngineModel) {
-                if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeOmega > 1e-5) GearBox.BrakeEnabled = false;
+                if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeRPM > 1e-5) GearBox.BrakeEnabled = false;
                 GearBox.MainRotorLoad = 0;
                 GearBox.MainRotorInertia = 0;
                 foreach (var rotor in Rotors) {

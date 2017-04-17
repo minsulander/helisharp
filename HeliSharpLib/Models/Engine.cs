@@ -29,17 +29,32 @@ namespace HeliSharp
 		public double RotSpeed { get; set; }
 
 		// Parameters
-		public double K_eng, tao_eng, J0, Kp, Ki, Kd, Pmax, intmax, idleRatio; // parameters
-		public double Qstart1, Qstart2, OmegaStart, startdelay; // starting torques and when to switch (parameters)
+		public double gain, timeConstant, internalInertia, proportionalGain, integralGain, derivativeGain, maxPower, integratorLimit, idleRatio; // parameters
+		public double startTorque, accelerationTorque, accelerationRPM, startDelay; // starting torques and when to switch (parameters)
 		public double friction; // internal friction (for stopping the engine)
-		public double Omega0; //rotational speed
-		private double starttime;
+		public double designRPM; //rotational speed
 
-		// states - output torque and change in rotational speed
+	    // Calculation names of parameters above
+	    private double K_eng => gain;
+	    private double tao_eng => timeConstant;
+	    private double J0 => internalInertia;
+	    private double Kp => proportionalGain;
+	    private double Ki => integralGain;
+	    private double Kd => derivativeGain;
+	    private double Pmax => maxPower;
+	    private double intmax => integratorLimit;
+	    private double Omega0 => designRPM / 9.5492966;
+
+	    // states - output torque and change in rotational speed
 		[JsonIgnore]
 		public double Qeng { get; set; }
 		[JsonIgnore]
 		public double Omega { get; set; }
+
+	    [JsonIgnore]
+	    public double RPM => Omega * 9.5492966;
+
+	    private double starttime;
 
 		public ODESolver Solver { get; set; }
 
@@ -51,22 +66,23 @@ namespace HeliSharp
 		}
 
 		public Engine LoadDefault() {
-			K_eng = 300;
-			tao_eng = 1000;
-			Kp = 200;
-			Ki = 2;
-			Kd = 10;
-			intmax = 1;
-			J0 = 3;
-			Omega0 = 628.32; // 6000 rpm
-			Pmax = 840000;
-			Qstart1 = 30;
-			Qstart2 = 250;
-			OmegaStart = 25;
-			startdelay = 2.5;
-			inertia = 10;
-			friction = 0.1;
-			idleRatio = 0.4;
+			gain = 300;
+			timeConstant = 1000;
+			proportionalGain = 200;
+			integralGain = 2;
+			derivativeGain = 10;
+			integratorLimit = 1;
+			internalInertia = 3;
+		    designRPM = 6000;
+			maxPower = 840000;
+			startTorque = 30;
+			accelerationTorque = 250;
+			accelerationRPM = 250;
+			startDelay = 2.5;
+		    friction = 0.1;
+		    idleRatio = 0.4;
+
+		    inertia = 10;
 			return this;
 		}
 
@@ -95,7 +111,7 @@ namespace HeliSharp
 			if (!initialized) Init(0);
 			// Transition to new phases
 			if (phase == Phase.START) {
-				if (starttime == -1) // first start update
+				if (starttime < -0.1) // first start update
 					starttime = 0;
 				if (Omega > idleRatio*Omega0)
 					phase = Phase.RUN;
@@ -129,6 +145,7 @@ namespace HeliSharp
 					Solver.State[2] = -intmax;
 			}
 			// Set output ports
+		    if (double.IsNaN(Omega) || double.IsInfinity(Omega)) throw new ModelException("Engine rotation speed would be " + Omega);
 			RotSpeed = Omega;
 		}
 
@@ -149,12 +166,12 @@ namespace HeliSharp
 				ydot[2] = 0;
 			} else if (phase == Phase.START) {
 				ydot[0] = 0;
-				if (starttime < startdelay)
+				if (starttime < startDelay)
 					Solver.State[0] = 0;
-				else if (Omega < OmegaStart)
-					Solver.State[0] = Qstart1;
+				else if (Omega < accelerationRPM / 9.5492966)
+					Solver.State[0] = startTorque;
 				else
-					Solver.State[0] = Qstart2;
+					Solver.State[0] = accelerationTorque;
 				ydot[1] = state[0]/J - Qload/J;
 				ydot[2] = 0;
 			}

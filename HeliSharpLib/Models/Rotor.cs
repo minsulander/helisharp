@@ -51,38 +51,69 @@ namespace HeliSharp
 		[JsonIgnore]
 		public bool trimflow { get; set; }		// Set once to trim dynamic inflow model
 
+	    public enum Direction
+	    {
+	        CounterClockwise,
+	        Clockwise,
+	    }
+
 		// Static parameters
-		public int 
-			Nb,									// Number of blades
-			rotdir;								// Direction of rotation 1=CCW, -1=CW when viewed from above
-		public double
-			theta_0_max,						// Maximum collective control deflection
-			theta_0_min,						// Minimum collective control deflection
-			theta_sin_max,						// Maximum longitudinal cyclic control deflection
-			theta_sin_min,						// Minimum longitudinal cyclic control deflection
-			theta_cos_max,						// Maximum lateral cyclic control deflection
-			theta_cos_min;						// Minimum lateral cyclic control deflection
-		public double
-			R,									// Blade radius
-			B,									// Effective blade radius (normalized)
-			R0,									// Effective blade root cutout (normalized)
-			c,									// Blade chord
-			k,									// Blade linear twist
-			a,									// Lift coefficient slope
-			cl0,								// Cl offset at 0 angle of attack
-			cd0,								// Constant drag coefficient
-			e,									// Effective hinge offset
-			theta_beta,							// Pitch-flap coupling
-			I_beta,								// Blade flap inertia
-			k_beta,								// Blade flap stiffness
-			designOmega,						// Design rotation speed
-			J0;									// Rotational inertia
-		public bool cyclicflap;					// Wether to allow cyclic flapping or not
+	    public int bladeCount;
+	    public double radius;
+	    public double effectiveRadius;
+	    public double effectiveRootCutout;
+	    public double chord;
+	    public double twist;
+	    public double liftSlope;
+	    public double liftOffset;
+	    public double drag;
+	    public double effectiveHingeOffset;
+	    public double pitchFlapCoupling;
+	    public double flapInertia;
+	    public double flapStiffness;
+	    public double designRPM;
+	    public double rotationalInertia;
+
+	    public Direction direction = Direction.CounterClockwise; // Direction of rotation, when viewed from above
+	    public double maxCollective;
+	    public double minCollective;
+	    public double maxLongCyclic;
+	    public double minLongCyclic;
+	    public double maxLatCyclic;
+	    public double minLatCyclic;
+
+
+		public bool cyclicFlapping;					// Wether to allow cyclic flapping or not
 
 		public bool useDynamicInflow;			// Use the dynamic inflow model?
 		public bool applyTorque;				// Apply rotor torque?
 
-        [NonSerialized]
+	    // Calculation names of parameters above
+	    private int Nb => bladeCount;			// Number of blades
+	    private int rotdir => direction == Direction.CounterClockwise ? 1 : -1;
+	    private double theta_0_max => maxCollective * Math.PI / 180.0;		// Maximum collective control deflection
+	    private double theta_0_min => minCollective * Math.PI / 180.0;		// Minimum collective control deflection
+	    private double theta_sin_max => maxLongCyclic * Math.PI / 180.0;	// Maximum longitudinal cyclic control deflection
+	    private double theta_sin_min => minLongCyclic * Math.PI / 180.0;	// Minimum longitudinal cyclic control deflection
+	    private double theta_cos_max => maxLatCyclic * Math.PI / 180.0;		// Maximum lateral cyclic control deflection
+	    private double theta_cos_min => minLatCyclic * Math.PI / 180.0;		// Minimum lateral cyclic control deflection
+	    private double R => radius;									        // Blade radius
+	    private double B => effectiveRadius;								// Effective blade radius (normalized)
+	    private double R0 => effectiveRootCutout;							// Effective blade root cutout (normalized)
+	    private double c => chord;									        // Blade chord
+	    private double k => twist;									        // Blade linear twist
+	    private double a => liftSlope;									    // Lift coefficient slope
+	    private double cl0 => liftOffset;								    // Cl offset at 0 angle of attack
+	    private double cd0 => drag;								            // Constant drag coefficient
+	    private double e => effectiveHingeOffset;							// Effective hinge offset
+	    private double theta_beta => pitchFlapCoupling;						// Pitch-flap coupling
+	    private double I_beta => flapInertia;								// Blade flap inertia
+	    private double k_beta => flapStiffness;								// Blade flap stiffness
+	    public double designOmega => designRPM / 9.5492966;				// Design rotation speed
+	    private double J0 => rotationalInertia;									    // Rotational inertia
+
+
+	    [NonSerialized]
 		private InflowModel inflow;
 		private double flapIterationTolerance = 1e-5;
 		private int maxFlapIterations = 50;
@@ -93,20 +124,15 @@ namespace HeliSharp
 				return Density * A * square(RotSpeed*R); 
 		} }
 
+	    [JsonIgnore]
+	    public double RPM => RotSpeed * 9.5492966;
+
 		public Rotor() : base()
 		{
 			inflow = new InflowModel ();
 
-			beta_0 = beta_sin = beta_cos = 0.0;
-			CT = CQ = CH = CY = 0.0;
-			Nb=0;
-			rotdir=1;
-			R=B=R0=c=k=a=cl0=cd0=e=theta_beta=I_beta=k_beta=designOmega=0.0;
-			lambda_i0=0.0;
-			J0=0.0;
 			WashVelocity = Vector<double>.Build.DenseOfArray(new double[] {0,0,0});
-			cyclicflap = true;
-			theta_0_max = theta_0_min = theta_sin_max = theta_sin_min = theta_cos_max = theta_cos_min = 0.0;
+			cyclicFlapping = true;
 			useDynamicInflow = false;
 			trimflow = true;
 			applyTorque = true;
@@ -119,28 +145,28 @@ namespace HeliSharp
 
 		public Rotor LoadDefault ()
 		{
-			Nb = 4;
-			R = 5.486;
-			B = 0.98;
-			R0 = 0.2;
-			c = 0.3353;
-			k = 0.105;
-			a = 5.2;
-			cl0 = 0;
-			cd0 = 0.011;
-			e = 0.027;
-			theta_beta = 0;
-			I_beta = 287.43;
-			k_beta = 0; // correct?
-			designOmega = 40.317106; // radian/sec = 385 rpm
-			J0 = 2711.6359; // kg m^2 = 2000 slug ft^2
-			theta_0_max = 18.1 * Math.PI/180.0;
-			theta_0_min = 4.4 * Math.PI/180.0;
-			theta_sin_max = 12.5 * Math.PI/180.0;
-			theta_sin_min = -10.5 * Math.PI/180.0;
-			theta_cos_max = 10.5 * Math.PI/180.0;
-			theta_cos_min = -7.5 * Math.PI/180.0;
-			cyclicflap = true;
+			bladeCount = 4;
+			radius = 5.486;
+			effectiveRadius = 0.98;
+			effectiveRootCutout = 0.2;
+			chord = 0.3353;
+			twist = 0.105;
+			liftSlope = 5.2;
+			liftOffset = 0;
+			drag = 0.011;
+			effectiveHingeOffset = 0.027;
+			pitchFlapCoupling = 0;
+			flapInertia = 287.43;
+			flapStiffness = 0; // correct?
+		    designRPM = 385;
+			rotationalInertia = 2711.6359; // kg m^2 = 2000 slug ft^2
+			maxCollective = 18.1;
+			minCollective = 4.4;
+			maxLongCyclic = 12.5;
+			minLongCyclic = -10.5;
+			maxLatCyclic = 10.5;
+			minLatCyclic = -7.5;
+			cyclicFlapping = true;
 
 			RotSpeed = designOmega;
 			Inertia = J0;
@@ -152,29 +178,29 @@ namespace HeliSharp
 		}
 
         public void CopyParameters(Rotor r) {
-            Nb = r.Nb;
-            rotdir = r.rotdir;
-            theta_0_max = r.theta_0_max;
-            theta_0_min = r.theta_0_min;
-            theta_cos_max = r.theta_cos_max;
-            theta_cos_min = r.theta_cos_min;
-            theta_sin_max = r.theta_sin_max;
-            theta_sin_min = r.theta_sin_min;
-            R = r.R;
-            B = r.B;
-            R0 = r.R0;
-            c = r.c;
-            k = r.k;
-            a = r.a;
-            cl0 = r.cl0;
-            cd0 = r.cd0;
-            e = r.e;
-            theta_beta = r.theta_beta;
-            I_beta = r.I_beta;
-            k_beta = r.k_beta;
-            designOmega = r.designOmega;
-            J0 = r.J0;
-            cyclicflap = r.cyclicflap;
+            bladeCount = r.bladeCount;
+            direction = r.direction;
+            maxCollective = r.maxCollective;
+            minCollective = r.minCollective;
+            maxLongCyclic = r.maxLongCyclic;
+            minLongCyclic = r.minLongCyclic;
+            maxLatCyclic = r.maxLatCyclic;
+            minLatCyclic = r.minLatCyclic;
+            radius = r.radius;
+            effectiveRadius = r.effectiveRadius;
+            effectiveRootCutout = r.effectiveRootCutout;
+            chord = r.chord;
+            twist = r.twist;
+            liftSlope = r.liftSlope;
+            liftOffset = r.liftOffset;
+            drag = r.drag;
+            effectiveHingeOffset = r.effectiveHingeOffset;
+            pitchFlapCoupling = r.pitchFlapCoupling;
+            flapInertia = r.flapInertia;
+            flapStiffness = r.flapStiffness;
+            designRPM = r.designRPM;
+            rotationalInertia = r.rotationalInertia;
+            cyclicFlapping = r.cyclicFlapping;
             useDynamicInflow = r.useDynamicInflow;
             applyTorque = r.applyTorque;
             RotSpeed = r.RotSpeed;
@@ -186,24 +212,24 @@ namespace HeliSharp
 
 		public Rotor LoadDefaultTailRotor ()
 		{
-			Nb = 2;
-			R = 1;
-			B = 0.98;
-			R0 = 0.1;
-			c = 0.2;
-			k = 0;
-			a = 5.0;
-			cl0 = 0;
-			cd0 = 0.011;
-			e = 0;
-			theta_beta = 0;
-			I_beta = 0.24587;
-			k_beta = 0;
-			designOmega = 217.8171; // radian/sec = 2080 rpm
-			J0 = 2.71163; // kg m^2 = 2 slug ft^2
-			theta_0_max = 23 * Math.PI/180.0;
-			theta_0_min = -7 * Math.PI/180.0;
-			cyclicflap = false;
+			bladeCount = 2;
+			radius = 1;
+			effectiveRadius = 0.98;
+			effectiveRootCutout = 0.1;
+			chord = 0.2;
+			twist = 0;
+			liftSlope = 5.0;
+			liftOffset = 0;
+			drag = 0.011;
+			effectiveHingeOffset = 0;
+			pitchFlapCoupling = 0;
+			flapInertia = 0.24587;
+			flapStiffness = 0;
+		    designRPM = 2080;
+			rotationalInertia = 2.71163; // kg m^2 = 2 slug ft^2
+			maxCollective = 23;
+			minCollective = -7;
+			cyclicFlapping = false;
 
 			RotSpeed = designOmega;
 			Inertia = J0;
@@ -217,6 +243,14 @@ namespace HeliSharp
 
 		public override void Update(double dt)
 		{
+		    // Validate inputs
+		    if (double.IsNaN(Density) || double.IsInfinity(Density)) throw new ModelException("Rotor density is " + Density);
+		    if (double.IsNaN(RotSpeed) || double.IsInfinity(RotSpeed)) throw new ModelException("Rotor rotational speed is " + RotSpeed);
+		    if (double.IsNaN(HeightAboveGround) || double.IsInfinity(HeightAboveGround)) throw new ModelException("Rotor height above ground is " + HeightAboveGround);
+		    if (double.IsNaN(Collective) || double.IsInfinity(Collective)) throw new ModelException("Rotor collective is " + Collective);
+		    if (cyclicFlapping && (double.IsNaN(LongCyclic) || double.IsInfinity(LongCyclic))) throw new ModelException("Rotor longitudinal cyclic is " + LongCyclic);
+		    if (cyclicFlapping && (double.IsNaN(LatCyclic) || double.IsInfinity(LatCyclic))) throw new ModelException("Rotor lateral cyclic is " + LatCyclic);
+
 			// Constants
 			double A=Math.PI*square(R);
 			//sigma = Nb*R*(B-R0)*c/A;
@@ -253,6 +287,9 @@ namespace HeliSharp
 			// Get control angles based on normalized inputs (from input ports) and min/max values (from parameters)
 			double theta_0, theta_sin, theta_cos;
 			GetControlAngles(out theta_0, out theta_sin, out theta_cos);
+		    if (double.IsNaN(theta_0) || double.IsInfinity(theta_0)) throw new ModelException("Rotor collective angle is " + theta_0);
+		    if (double.IsNaN(theta_sin) || double.IsInfinity(theta_sin)) throw new ModelException("Rotor longitudinal cyclic angle is " + theta_sin);
+		    if (double.IsNaN(theta_cos) || double.IsInfinity(theta_cos)) throw new ModelException("Rotor lateral cyclic angle is " + theta_cos);
 
 			// Hub plane side-slip transformation (cases to avoid singularities)
 			double deltaPsi=Math.Atan2(V[1],V[0]);
@@ -268,7 +305,7 @@ namespace HeliSharp
 			double beta_sinw=beta_cos*Math.Sin(deltaPsi)+beta_sin*Math.Cos(deltaPsi);
 			double beta_cosw=beta_cos*Math.Cos(deltaPsi)-beta_sin*Math.Sin(deltaPsi);
 
-			if (!cyclicflap) {
+			if (!cyclicFlapping) {
 				theta_sinw = theta_cosw = 0.0;
 			}
 
@@ -363,19 +400,21 @@ namespace HeliSharp
 				beta_sinw = x [1];
 				beta_cosw = x [2];
 
-				if (!cyclicflap) {
+				if (!cyclicFlapping) {
 					beta_sinw = beta_cosw = 0.0;
 				}
 
 				CT=-1.0/24.0*sigma*(-6.0*Omega*powi(B,2)*a*lambda_i0+4.0*Omega*powi(R0,3)*a*theta_0-3.0*a*k*Omega*powi(R0,4)+3.0*a*k*Omega*powi(B,4)-6.0*Omega*mu_x*R0*a*beta_cosw*e-6.0*Omega*powi(B,2)*a*theta_beta*beta_sinw*mu_x-3.0*Omega*powi(R0,2)*powi(mu_x,2)*a*k-6.0*Omega*powi(B,2)*a*theta_sinw*mu_x+6.0*Omega*powi(mu_x,2)*R0*cl0-6.0*Omega*powi(mu_x,2)*B*cl0-4.0*Omega*powi(B,3)*cl0+6.0*Omega*powi(R0,2)*a*theta_beta*beta_sinw*mu_x+6.0*Omega*powi(R0,2)*a*mu_z+6.0*Omega*mu_x*B*a*beta_cosw*e-6.0*Omega*powi(B,2)*a*mu_z+4.0*Omega*powi(R0,3)*cl0+6.0*Omega*powi(R0,2)*a*lambda_i0+6.0*Omega*powi(mu_x,2)*R0*a*theta_beta*beta_0+6.0*Omega*powi(mu_x,2)*R0*a*theta_0-6.0*Omega*powi(mu_x,2)*B*a*theta_0-6.0*Omega*powi(mu_x,2)*B*a*theta_beta*beta_0+6.0*Omega*powi(R0,2)*a*theta_sinw*mu_x+3.0*powi(R0,2)*a*p_w*mu_x+3.0*Omega*powi(B,2)*powi(mu_x,2)*a*k-3.0*powi(B,2)*a*p_w*mu_x+4.0*Omega*powi(R0,3)*a*theta_beta*beta_0-4.0*Omega*powi(B,3)*a*theta_0-4.0*Omega*powi(B,3)*a*theta_beta*beta_0)/Omega;
 
-				if (usingDynamicInflow) {
+				if (usingDynamicInflow && Math.Abs(lambda_i0) > 1e-5) {
 					// Increase thrust due to ground effect (Padfield eq 3.218 pg 141 (2nd edition))
 					CT *= 1.0/(1.0-1.0/16.0*square(R/(HeightAboveGround))/(1.0+square(mu_x/lambda_i0)));
 					break;
 				}
 
-				residual = Math.Abs(CT-oldCT)+Math.Abs(beta_cosw-oldBC);
+			    if (double.IsNaN(CT) || double.IsInfinity(CT)) throw new ModelException("Rotor thrust would be " + CT);
+
+			    residual = Math.Abs(CT-oldCT)+Math.Abs(beta_cosw-oldBC);
 				++iter;
 				if (iter > maxFlapIterations) {
 					Warning = true;
@@ -418,11 +457,22 @@ namespace HeliSharp
 			Matrix<double> RM = Matrix<double>.Build.RotationZ (deltaPsi);
 			WashVelocity = RM * Vector<double>.Build.DenseOfArray(new double[] {-Math.Sin(xi) * Vi, 0, Math.Cos(xi)*Vi});
 
-			// Set output ports
+		    var Qshaft = Q*Math.Cos(beta_cos)*Math.Cos(beta_sin) * rotdir;
+		    var J = J0 * square(Math.Cos(beta_0)); // adjust inertia for coning
+		    // Validate output
+		    if (double.IsNaN(F.x()) || double.IsInfinity(F.x())) throw new ModelException("Rotor force Fx would be " + F.x());
+		    if (double.IsNaN(F.y()) || double.IsInfinity(F.y())) throw new ModelException("Rotor force Fy would be " + F.y());
+		    if (double.IsNaN(F.z()) || double.IsInfinity(F.z())) throw new ModelException("Rotor force Fz would be " + F.z());
+		    if (double.IsNaN(M.x()) || double.IsInfinity(M.x())) throw new ModelException("Rotor torque Mx would be " + M.x());
+		    if (double.IsNaN(M.y()) || double.IsInfinity(M.y())) throw new ModelException("Rotor torque My would be " + M.y());
+		    if (double.IsNaN(M.z()) || double.IsInfinity(M.z())) throw new ModelException("Rotor torque Mz would be " + M.z());
+		    if (double.IsNaN(Qshaft) || double.IsInfinity(Qshaft)) throw new ModelException("Rotor shaft torque would be " + Qshaft);
+		    if (double.IsNaN(J) || double.IsInfinity(J)) throw new ModelException("Rotor inertia would be " + J);
+		    // Set output ports
 			Force = F;
 			Torque = M;
-			ShaftTorque = Q*Math.Cos(beta_cos)*Math.Cos(beta_sin) * rotdir;
-			Inertia = J0 * square(Math.Cos(beta_0)); // adjust inertia for coning
+		    ShaftTorque = Qshaft;
+		    Inertia = J;
 		}
 
 		public void GetControlAngles(out double theta_0, out double theta_sin, out double theta_cos)
@@ -430,12 +480,16 @@ namespace HeliSharp
 			GetControlAnglesFromNormalized(Collective, LongCyclic, LatCyclic, out theta_0, out theta_sin, out theta_cos);
 		}
 
-		public void GetControlAnglesFromNormalized(double collective, double longitudinal, double lateral, out double theta_0, out double theta_sin, out double theta_cos)
-		{
-			theta_0 = limit( theta_0_min + (collective + 1.0)/2.0 * (theta_0_max-theta_0_min), theta_0_min, theta_0_max);
-			theta_sin = limit( theta_sin_min + (-longitudinal + 1.0)/2.0 * (theta_sin_max-theta_sin_min), theta_sin_min, theta_sin_max);
-			theta_cos = limit( theta_cos_min + (-lateral + 1.0)/2.0 * (theta_cos_max-theta_cos_min), theta_cos_min, theta_cos_max);
-		}
+	    public void GetControlAnglesFromNormalized(double collective, double longitudinal, double lateral, out double theta_0, out double theta_sin, out double theta_cos)
+	    {
+	        theta_0 = limit( theta_0_min + (collective + 1.0)/2.0 * (theta_0_max-theta_0_min), theta_0_min, theta_0_max);
+	        if (cyclicFlapping) {
+	            theta_sin = limit(theta_sin_min + (-longitudinal + 1.0) / 2.0 * (theta_sin_max - theta_sin_min), theta_sin_min, theta_sin_max);
+	            theta_cos = limit(theta_cos_min + (-lateral + 1.0) / 2.0 * (theta_cos_max - theta_cos_min), theta_cos_min, theta_cos_max);
+	        } else {
+	            theta_sin = theta_cos = 0;
+	        }
+	    }
 
 		public void GetNormalizedControlAngles(double theta_0, double theta_sin, double theta_cos, out double collective, out double longitudinal, out double lateral)
 		{

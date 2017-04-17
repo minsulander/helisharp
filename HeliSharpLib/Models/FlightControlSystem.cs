@@ -17,8 +17,8 @@ namespace HeliSharp
         public bool verticalRateControl = true;
         public bool attitudeControl = true;
         public bool positionControl = true;
-        public double nominalPitchAngle = 0.5; // about 30 deg
-        public double nominalRollAngle = 0.5;
+        public double maxPitchAngle = 30; // degrees
+        public double maxRollAngle = 30; // degrees
 		public double longExpo = 1, latExpo = 1, pedalExpo = 1;
 		public double yawDamperVelocity1, yawDamperVelocity2;
 
@@ -163,15 +163,15 @@ namespace HeliSharp
                 Collective += verticalRatePID.Calculate(dt, CollectiveCommand, -Velocity.z());
             }
             if (attitudeControl) {
-                var desiredPitchAngle = TrimAttitude.y() - LongCommand * nominalPitchAngle;
-                var desiredRollAngle = TrimAttitude.x() + LatCommand * nominalRollAngle;
+                var desiredPitchAngle = TrimAttitude.y() - LongCommand * maxPitchAngle * Math.PI / 180.0;
+                var desiredRollAngle = TrimAttitude.x() + LatCommand * maxRollAngle * Math.PI / 180.0;
 
                 if (positionControl) {
                     if (longitudinalPID != null) {
-                        desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, Velocity.x()) * nominalPitchAngle;
+                        desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, Velocity.x()) * maxPitchAngle * Math.PI / 180.0;
                     }
                     if (lateralPID != null) {
-                        desiredRollAngle += lateralPID.Calculate(dt, LatCommand, Velocity.y()) * nominalRollAngle;
+                        desiredRollAngle += lateralPID.Calculate(dt, LatCommand, Velocity.y()) * maxRollAngle * Math.PI / 180.0;
                     }
                 }
 

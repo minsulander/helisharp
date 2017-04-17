@@ -7,7 +7,16 @@ using Newtonsoft.Json;
 
 namespace HeliSharp
 {
-	[Serializable]
+
+    public class ModelException : Exception
+    {
+        public ModelException(string message) : base(message)
+        {
+        }
+
+    }
+
+    [Serializable]
 	public abstract class ForceModel
 	{
 

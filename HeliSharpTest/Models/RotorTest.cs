@@ -209,17 +209,17 @@ namespace HeliSharp
 		public void TestControlAngles ()
 		{
 			Rotor rotor = new Rotor ();
-			rotor.theta_0_min = 2;
-			rotor.theta_0_max = 8;
-			rotor.theta_sin_min = -10;
-			rotor.theta_sin_max = 12;
-			rotor.theta_cos_min = -8;
-			rotor.theta_cos_max = 8;
+			rotor.minCollective = 2;
+			rotor.maxCollective = 8;
+			rotor.minLongCyclic = -10;
+			rotor.maxLongCyclic = 12;
+			rotor.minLatCyclic = -8;
+			rotor.maxLatCyclic = 8;
 
 			double t0, ts, tc;
 			rotor.GetControlAnglesFromNormalized (0, 0, 0, out t0, out ts, out tc);
-			Assert.AreEqual (5, t0);
-			Assert.AreEqual (1, ts);
+			Assert.AreEqual (5 * Math.PI / 180, t0, 0.001);
+			Assert.AreEqual (1 * Math.PI / 180, ts, 0.001);
 			Assert.AreEqual (0, tc);
 
 		}

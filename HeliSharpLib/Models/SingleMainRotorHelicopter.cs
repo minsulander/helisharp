@@ -85,8 +85,8 @@ namespace HeliSharp
 
 		public override void InitEngine(bool running) {
 			UseEngineModel = true;
-			GearBox.MainRotorRatio = Engine.Omega0 / MainRotor.designOmega;
-			GearBox.TailRotorRatio = Engine.Omega0 / TailRotor.designOmega;
+			GearBox.MainRotorRatio = Engine.designRPM / MainRotor.designRPM;
+			GearBox.TailRotorRatio = Engine.designRPM / TailRotor.designRPM;
 			if (running) {
 				MainRotor.RotSpeed = MainRotor.designOmega;
 				TailRotor.RotSpeed = TailRotor.designOmega;
@@ -109,11 +109,11 @@ namespace HeliSharp
 	        mainRotor.Collective = FCS.Collective;
 	        mainRotor.LongCyclic = FCS.LongCyclic;
 	        mainRotor.LatCyclic = FCS.LatCyclic;
-	        tailRotor.Collective = -FCS.Pedal; // TODO make pedal-collective inversion a parameter
+	        tailRotor.Collective = -FCS.Pedal; // TODO make pedal-collective inversion a parameter, or figure it out
 
 	        // Update engine and drivetrain
 	        if (UseEngineModel) {
-	            if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeOmega > 1e-5) GearBox.BrakeEnabled = false;
+	            if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeRPM > 1e-5) GearBox.BrakeEnabled = false;
 	            GearBox.MainRotorLoad = MainRotor.ShaftTorque;
 	            GearBox.TailRotorLoad = TailRotor.ShaftTorque;
 	            GearBox.MainRotorInertia = MainRotor.Inertia;

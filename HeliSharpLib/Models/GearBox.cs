@@ -30,9 +30,10 @@ namespace HeliSharp
 		internal bool engaged;
 
 		// Parameters
-		public double friction, limit;
+		public double friction;
         public double brakeTorque;
-        public double autoBrakeOmega;
+	    public double limitRPM;
+        public double autoBrakeRPM;
 
 		public GearBox() {
 			MainRotorRatio = TailRotorRatio = 1.0;
@@ -42,7 +43,8 @@ namespace HeliSharp
 			MainRotorSpeed = 0;
 			TailRotorSpeed = 0;
 			Load = 0;
-			limit = 0;
+			limitRPM = 0;
+		    autoBrakeRPM = 0;
 			MainRotorInertia = 1;
 			TailRotorInertia = 1;
 			MainRotorLoad = 0;
@@ -50,42 +52,48 @@ namespace HeliSharp
 		}
 
 		public GearBox LoadDefault() {
-			limit = 785; // 7500 rpm
 			friction = 0.1697; // powerloss / engine.Omega0^2
             brakeTorque = 75;
-            autoBrakeOmega = 150.0;
+		    limitRPM = 7500;
+            autoBrakeRPM = 1500;
 			return this;
 		}
 
 		public void Update(double dt) {
-            if (autoBrakeOmega > 1e-5 && Omega < autoBrakeOmega && RotspeedDrive < Omega) BrakeEnabled = true;
+            if (autoBrakeRPM > 1e-5 && Omega < autoBrakeRPM / 9.5492966 && RotspeedDrive < Omega) BrakeEnabled = true;
+		    var Qload = MainRotorLoad/MainRotorRatio + TailRotorLoad/TailRotorRatio + friction*Omega + (BrakeEnabled && Omega > 0 ? brakeTorque : 0);
+		    var J = MainRotorInertia/(MainRotorRatio*MainRotorRatio) + TailRotorInertia/(TailRotorRatio*TailRotorRatio);
             // Clutch condition - if engine RPM >= rotor RPM, clutch engages load
             if (RotspeedDrive > Omega) {
 				// Engine driving
 				engaged = true;
 				Omega = RotspeedDrive;
-				Load = MainRotorLoad/MainRotorRatio + TailRotorLoad/TailRotorRatio + friction*Omega + (BrakeEnabled && Omega > 0 ? brakeTorque : 0);
-				Inertia = MainRotorInertia/(MainRotorRatio*MainRotorRatio) + TailRotorInertia/(TailRotorRatio*TailRotorRatio);
 			} else {
-				double J = MainRotorInertia/(MainRotorRatio*MainRotorRatio) + TailRotorInertia/(TailRotorRatio*TailRotorRatio);
-				double Q = MainRotorLoad/MainRotorRatio + TailRotorLoad/TailRotorRatio + friction*Omega + (BrakeEnabled && Omega > 0 ? brakeTorque : 0);
-				Omega -= Q/J*dt;
+				Omega -= Qload/J*dt;
 				// Reduce the load when there is a bit of margin between rotation speeds
 				// (otherwise the load just oscillates between updates)
 				if (RotspeedDrive / Omega < 0.99) {
 					// Clutch disengaged - rotors spin freely
 					engaged = false;
-					Load = 0;
-					Inertia = 0;
+					Qload = 0;
+					J = 0;
 				}
 			}
-			if (limit > 1e-5 && Omega > limit) {
-				Omega = limit;
-				//warnflag = true;
-				//warnstr = "Limiting rotation speed";
+			if (limitRPM > 1e-5 && Omega > limitRPM / 9.5492966) {
+				Omega = limitRPM / 9.5492966;
 			}
-			MainRotorSpeed = Omega / MainRotorRatio;
-			TailRotorSpeed = Omega / TailRotorRatio;
+		    var OmegaMR = Omega / MainRotorRatio;
+		    var OmegaTR = Omega / TailRotorRatio;
+		    // Validate output
+		    if (double.IsNaN(Qload) || double.IsInfinity(Qload)) throw new ModelException("Gearbox load would be " + Qload);
+		    if (double.IsNaN(J) || double.IsInfinity(J)) throw new ModelException("Gearbox inertia would be " + J);
+		    if (double.IsNaN(OmegaMR) || double.IsInfinity(OmegaMR)) throw new ModelException("Gearbox main rotor speed would be " + OmegaMR);
+		    if (double.IsNaN(OmegaTR) || double.IsInfinity(OmegaTR)) throw new ModelException("Gearbox tail rotor speed would be " + OmegaTR);
+		    // Set output ports
+		    Load = Qload;
+		    Inertia = J;
+			MainRotorSpeed = OmegaMR;
+			TailRotorSpeed = OmegaTR;
 		}
 	}
 }

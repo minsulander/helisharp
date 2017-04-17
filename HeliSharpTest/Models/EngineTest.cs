@@ -20,10 +20,10 @@ namespace HeliSharp
 			for (double t = 0.0; t < 10.0; t += 0.1) {
 				model.Update(0.1);
 			}
-			Console.WriteLine("Omega " + model.Omega.ToStr() + " omega0 " + model.Omega0.ToStr());
-			Assert.IsTrue(model.Omega > 0.99*model.Omega0);
-			Console.WriteLine("P " + (model.Qeng * model.Omega).ToStr() + " max " + model.Pmax);
-			Assert.IsTrue(model.Qeng * model.Omega < 0.99*model.Pmax);
+			Console.WriteLine("RPM " + model.RPM.ToStr() + " designRPM " + model.designRPM.ToStr());
+			Assert.IsTrue(model.RPM > 0.99*model.designRPM);
+			Console.WriteLine("P " + (model.Qeng * model.Omega).ToStr() + " max " + model.maxPower);
+			Assert.IsTrue(model.Qeng * model.Omega < 0.99*model.maxPower);
 		}
 
 		[Test]
@@ -35,10 +35,10 @@ namespace HeliSharp
 			for (double t = 0.0; t < 10.0; t += 0.1) {
 				model.Update(0.1);
 			}
-			Console.WriteLine("Omega " + model.Omega.ToStr() + " omega0 " + model.Omega0.ToStr());
-			Assert.IsTrue(model.Omega < 0.99*model.Omega0);
-			Console.WriteLine("P " + (model.Qeng * model.Omega).ToStr() + " max " + model.Pmax);
-			Assert.IsTrue(model.Qeng * model.Omega >= 0.99*model.Pmax);
+		    Console.WriteLine("RPM " + model.RPM.ToStr() + " designRPM " + model.designRPM.ToStr());
+			Assert.IsTrue(model.RPM < 0.99*model.designRPM);
+		    Console.WriteLine("P " + (model.Qeng * model.Omega).ToStr() + " max " + model.maxPower);
+			Assert.IsTrue(model.Qeng * model.Omega >= 0.99*model.maxPower);
 		}
 
 		[Test]
@@ -55,8 +55,8 @@ namespace HeliSharp
 				model.Update(0.1);
 			}
 
-			Console.WriteLine("Omega " + model.Omega.ToStr() + " omega0 " + model.Omega0.ToStr());
-			Assert.IsTrue(model.Omega > model.Omega0);
+		    Console.WriteLine("RPM " + model.RPM.ToStr() + " designRPM " + model.designRPM.ToStr());
+			Assert.IsTrue(model.RPM > model.designRPM);
 		}
 
 
@@ -68,20 +68,20 @@ namespace HeliSharp
 
 			for (double t = 0.0; t < 30.0; t += 0.1) {
 				model.Update(0.1);
-				Console.WriteLine("Phase " + model.phase + " Omega " + model.Omega.ToStr() + " omegaStart " + model.OmegaStart.ToStr() + " Qeng " + model.Qeng.ToStr());
+				Console.WriteLine("Phase " + model.phase + " RPM " + model.RPM.ToStr() + " accelerationRPM " + model.accelerationRPM.ToStr() + " Qeng " + model.Qeng.ToStr());
 			}
 
 			Assert.AreEqual(Engine.Phase.RUN, model.phase);
-			Assert.IsTrue(model.Omega > 0.9 * model.OmegaStart);
-			Assert.IsTrue(model.Omega > 0.9 * model.Omega0 * model.idleRatio);
+			Assert.IsTrue(model.RPM > 0.9 * model.accelerationRPM);
+			Assert.IsTrue(model.RPM > 0.9 * model.designRPM * model.idleRatio);
 
 			model.phase = Engine.Phase.CUTOFF;
 			for (double t = 0.0; t < 30.0; t += 0.1) {
 				model.Update(0.1);
-				Console.WriteLine("Phase " + model.phase + " Omega " + model.Omega.ToStr() + " omegaStart " + model.OmegaStart.ToStr() + " Qeng " + model.Qeng.ToStr());
+				Console.WriteLine("Phase " + model.phase + " RPM " + model.RPM.ToStr() + " accelerationRPM " + model.accelerationRPM.ToStr() + " Qeng " + model.Qeng.ToStr());
 			}
 
-			Assert.IsTrue(model.Omega < model.OmegaStart);
+			Assert.IsTrue(model.RPM < model.accelerationRPM);
 		}
 	}
 }
