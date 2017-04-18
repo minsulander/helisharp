@@ -189,7 +189,7 @@ namespace HeliSharp
             if (Fuselage != null) Fuselage.Density = Atmosphere.Density;
 
             // Update FCS
-            FCS.HorizonVelocity = Matrix<double>.Build.RotationZ(-Attitude.z()) * (InvRotation * Velocity);
+            FCS.HorizonVelocity = Matrix<double>.Build.RotationZ(Attitude.z()) * (InvRotation * Velocity);
             FCS.Velocity = Velocity;
             FCS.AngularVelocity = AngularVelocity;
             FCS.Attitude = Attitude;
