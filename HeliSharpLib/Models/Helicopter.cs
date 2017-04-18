@@ -71,7 +71,7 @@ namespace HeliSharp
         }
 
         // Attitude needs to be set from rigid body simulation
-        // phi (roll +right), theta (pitch +down), psi (heading +right)
+        // phi (roll +right), theta (pitch +up), psi (heading +right)
 
         private Vector<double> attitude = Vector<double>.Build.Zero3();
 
@@ -189,6 +189,7 @@ namespace HeliSharp
             if (Fuselage != null) Fuselage.Density = Atmosphere.Density;
 
             // Update FCS
+            FCS.HorizonVelocity = Matrix<double>.Build.RotationZ(-Attitude.z()) * (InvRotation * Velocity);
             FCS.Velocity = Velocity;
             FCS.AngularVelocity = AngularVelocity;
             FCS.Attitude = Attitude;

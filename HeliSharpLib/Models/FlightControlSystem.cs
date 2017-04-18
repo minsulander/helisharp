@@ -43,6 +43,8 @@ namespace HeliSharp
 		public double TrimPedal { get; set; }
 		[JsonIgnore]
 		public Vector<double> TrimAttitude { get; set; }
+	    [JsonIgnore]
+	    public Vector<double> HorizonVelocity { get; set; }
 		[JsonIgnore]
 		public Vector<double> Velocity { get; set; }
 		[JsonIgnore]
@@ -160,7 +162,7 @@ namespace HeliSharp
 				LatCyclic += rollRatePID.Calculate(dt, LatCommand, AngularVelocity.x());
 			}
             if (verticalRateControl && verticalRatePID != null) {
-                Collective += verticalRatePID.Calculate(dt, CollectiveCommand, -Velocity.z());
+                Collective += verticalRatePID.Calculate(dt, CollectiveCommand, -HorizonVelocity.z());
             }
             if (attitudeControl) {
                 var desiredPitchAngle = TrimAttitude.y() - LongCommand * maxPitchAngle * Math.PI / 180.0;
@@ -168,10 +170,10 @@ namespace HeliSharp
 
                 if (positionControl) {
                     if (longitudinalPID != null) {
-                        desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, Velocity.x()) * maxPitchAngle * Math.PI / 180.0;
+                        desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x()) * maxPitchAngle * Math.PI / 180.0;
                     }
                     if (lateralPID != null) {
-                        desiredRollAngle += lateralPID.Calculate(dt, LatCommand, Velocity.y()) * maxRollAngle * Math.PI / 180.0;
+                        desiredRollAngle += lateralPID.Calculate(dt, LatCommand, HorizonVelocity.y()) * maxRollAngle * Math.PI / 180.0;
                     }
                 }
 
