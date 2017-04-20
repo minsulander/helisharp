@@ -30,32 +30,32 @@ namespace HeliSharp
         public double Collective
         {
             // positive up
-            get { return FCS.CollectiveCommand; }
-            set { FCS.CollectiveCommand = value; }
+            get { return FCS.CollectiveInput; }
+            set { FCS.CollectiveInput = value; }
         }
 
         [JsonIgnore]
         public double LongCyclic
         {
             // positive forward
-            get { return FCS.LongCommand; }
-            set { FCS.LongCommand = value; }
+            get { return FCS.LongInput; }
+            set { FCS.LongInput = value; }
         }
 
         [JsonIgnore]
         public double LatCyclic
         {
             // positive right
-            get { return FCS.LatCommand; }
-            set { FCS.LatCommand = value; }
+            get { return FCS.LatInput; }
+            set { FCS.LatInput = value; }
         }
 
         [JsonIgnore]
         public double Pedal
         {
             // positive right
-            get { return FCS.PedalCommand; }
-            set { FCS.PedalCommand = value; }
+            get { return FCS.PedalInput; }
+            set { FCS.PedalInput = value; }
         }
 
         // Orientation
@@ -189,7 +189,7 @@ namespace HeliSharp
             if (Fuselage != null) Fuselage.Density = Atmosphere.Density;
 
             // Update FCS
-            FCS.HorizonVelocity = Matrix<double>.Build.RotationZ(Attitude.z()) * (InvRotation * Velocity);
+            FCS.HorizonVelocity = Matrix<double>.Build.RotationZ(-Attitude.z()) * (Rotation * Velocity);
             FCS.Velocity = Velocity;
             FCS.AngularVelocity = AngularVelocity;
             FCS.Attitude = Attitude;

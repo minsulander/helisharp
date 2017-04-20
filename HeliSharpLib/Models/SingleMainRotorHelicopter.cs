@@ -209,10 +209,10 @@ namespace HeliSharp
                 FCS.TrimPedal = Pedal;
                 FCS.TrimAttitude = Attitude.Clone();
                 if (FCS.trimControl) {
-                    FCS.CollectiveCommand = 0;
-                    FCS.LongCommand = 0;
-                    FCS.LatCommand = 0;
-                    FCS.PedalCommand = 0;
+                    FCS.CollectiveInput = 0;
+                    FCS.LongInput = 0;
+                    FCS.LatInput = 0;
+                    FCS.PedalInput = 0;
                 }
             } finally {
                 FCS.enabled = fcs;
