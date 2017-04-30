@@ -114,17 +114,17 @@ namespace HeliSharp
 	        // Update engine and drivetrain
 	        if (UseEngineModel) {
 	            if (Engine.phase == Engine.Phase.START && GearBox.autoBrakeRPM > 1e-5) GearBox.BrakeEnabled = false;
-	            GearBox.MainRotorLoad = MainRotor.ShaftTorque;
-	            GearBox.TailRotorLoad = TailRotor.ShaftTorque;
-	            GearBox.MainRotorInertia = MainRotor.Inertia;
-	            GearBox.TailRotorInertia = TailRotor.Inertia;
+	            GearBox.MainRotorLoad = MainRotor.Enabled ? MainRotor.ShaftTorque : 0;
+	            GearBox.TailRotorLoad = TailRotor.Enabled ? TailRotor.ShaftTorque : 0;
+	            GearBox.MainRotorInertia = MainRotor.Enabled ? MainRotor.Inertia : 0;
+	            GearBox.TailRotorInertia = TailRotor.Enabled ? TailRotor.Inertia : 0;
 	            GearBox.Update(dt);
 	            Engine.load = GearBox.Load;
 	            Engine.inertia = GearBox.Inertia;
 	            Engine.Update(dt);
 	            GearBox.RotspeedDrive = Engine.RotSpeed;
-	            MainRotor.RotSpeed = GearBox.MainRotorSpeed;
-	            TailRotor.RotSpeed = GearBox.TailRotorSpeed;
+	            MainRotor.RotSpeed = MainRotor.Enabled ? GearBox.MainRotorSpeed : 0;
+	            TailRotor.RotSpeed = TailRotor.Enabled ? GearBox.TailRotorSpeed : 0;
 	        }
 	    }
 

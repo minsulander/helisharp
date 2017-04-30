@@ -81,6 +81,7 @@ namespace HeliSharp
                 GearBox.MainRotorLoad = 0;
                 GearBox.MainRotorInertia = 0;
                 foreach (var rotor in Rotors) {
+					if (!rotor.Enabled) continue;
                     GearBox.MainRotorLoad += Math.Abs(rotor.ShaftTorque);
                     GearBox.MainRotorInertia += rotor.Inertia;
                 }
@@ -92,7 +93,7 @@ namespace HeliSharp
                 Engine.Update(dt);
                 GearBox.RotspeedDrive = Engine.RotSpeed;
                 foreach (var rotor in Rotors) {
-                    rotor.RotSpeed = GearBox.MainRotorSpeed;
+                    rotor.RotSpeed = rotor.Enabled ? GearBox.MainRotorSpeed : 0;
                 }
             }
         }
