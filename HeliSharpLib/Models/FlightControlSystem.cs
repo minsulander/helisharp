@@ -57,7 +57,7 @@ namespace HeliSharp
         [JsonIgnore]
         public bool IsOnGround { get; set; }
         [JsonIgnore]
-        public bool LongitudinalPositionBypass { get; set; }
+        public double LongitudinalPositionBypass { get; set; }
 
 		// Outputs
 		[JsonIgnore]
@@ -152,49 +152,49 @@ namespace HeliSharp
 			return this;
 		}
 
-		public void Update(double dt) {
-		    CollectiveCommand = CollectiveInput;
-		    LongCommand = LongInput;
-		    LatCommand = LatInput;
-		    PedalCommand = PedalInput;
+        public void Update(double dt) {
+            CollectiveCommand = CollectiveInput;
+            LongCommand = LongInput;
+            LatCommand = LatInput;
+            PedalCommand = PedalInput;
 
-		    if (enabled) {
-		        // Apply nullzones
-		        if (trimControl && collectiveNullZone > 1e-5) CollectiveCommand = Math.Abs(CollectiveCommand) > collectiveNullZone
-		                ? (CollectiveCommand - Math.Sign(CollectiveCommand) * collectiveNullZone) / (1.0 - collectiveNullZone)
-		                : 0.0;
-		        if (longNullZone > 1e-5) LongCommand = Math.Abs(LongCommand) > longNullZone
-		                ? (LongCommand - Math.Sign(LongCommand) * longNullZone) / (1.0 - longNullZone)
-		                : 0.0;
-		        if (latNullZone > 1e-5) LatCommand = Math.Abs(LatCommand) > latNullZone
-		                ? (LatCommand - Math.Sign(LatCommand) * latNullZone) / (1.0 - latNullZone)
-		                : 0.0;
-		        if (pedalNullZone > 1e-5) PedalCommand = Math.Abs(PedalCommand) > pedalNullZone
-		                ? (PedalCommand - Math.Sign(PedalCommand) * pedalNullZone) / (1.0 - pedalNullZone)
-		                : 0.0;
+            if (enabled) {
+                // Apply nullzones
+                if (trimControl && collectiveNullZone > 1e-5) CollectiveCommand = Math.Abs(CollectiveCommand) > collectiveNullZone
+                        ? (CollectiveCommand - Math.Sign(CollectiveCommand) * collectiveNullZone) / (1.0 - collectiveNullZone)
+                        : 0.0;
+                if (longNullZone > 1e-5) LongCommand = Math.Abs(LongCommand) > longNullZone
+                        ? (LongCommand - Math.Sign(LongCommand) * longNullZone) / (1.0 - longNullZone)
+                        : 0.0;
+                if (latNullZone > 1e-5) LatCommand = Math.Abs(LatCommand) > latNullZone
+                        ? (LatCommand - Math.Sign(LatCommand) * latNullZone) / (1.0 - latNullZone)
+                        : 0.0;
+                if (pedalNullZone > 1e-5) PedalCommand = Math.Abs(PedalCommand) > pedalNullZone
+                        ? (PedalCommand - Math.Sign(PedalCommand) * pedalNullZone) / (1.0 - pedalNullZone)
+                        : 0.0;
 
-		        // Apply exponential controls
-		        if (trimControl && collectiveExpo > 1e-5) CollectiveCommand = Math.Sign(CollectiveCommand) * Math.Pow(Math.Abs(CollectiveCommand), collectiveExpo);
-		        if (longExpo > 1e-5) LongCyclic = Math.Sign(LongCommand) * Math.Pow(Math.Abs(LongCommand), longExpo);
-		        if (latExpo > 1e-5) LatCyclic = Math.Sign(LatCommand) * Math.Pow(Math.Abs(LatCommand), latExpo);
-		        if (pedalExpo > 1e-5) PedalCommand = Math.Sign(PedalCommand) * Math.Pow(Math.Abs(PedalCommand), pedalExpo);
-		    }
+                // Apply exponential controls
+                if (trimControl && collectiveExpo > 1e-5) CollectiveCommand = Math.Sign(CollectiveCommand) * Math.Pow(Math.Abs(CollectiveCommand), collectiveExpo);
+                if (longExpo > 1e-5) LongCyclic = Math.Sign(LongCommand) * Math.Pow(Math.Abs(LongCommand), longExpo);
+                if (latExpo > 1e-5) LatCyclic = Math.Sign(LatCommand) * Math.Pow(Math.Abs(LatCommand), latExpo);
+                if (pedalExpo > 1e-5) PedalCommand = Math.Sign(PedalCommand) * Math.Pow(Math.Abs(PedalCommand), pedalExpo);
+            }
 
-		    // Start with 1:1 control
-		    Collective = CollectiveCommand * collectiveDirect;
-		    LongCyclic = LongCommand * longDirect;
-		    LatCyclic = LatCommand * latDirect;
-		    Pedal = PedalCommand * pedalDirect;
+            // Start with 1:1 control
+            Collective = CollectiveCommand * collectiveDirect;
+            LongCyclic = LongCommand * longDirect;
+            LatCyclic = LatCommand * latDirect;
+            Pedal = PedalCommand * pedalDirect;
 
-		    if (!enabled) return;
+            if (!enabled) return;
 
-		    // Apply PID controllers
-			if (pitchRatePID != null) {
-				LongCyclic -= pitchRatePID.Calculate(dt, -LongCommand, AngularVelocity.y());
-			}
-			if (rollRatePID != null) {
-				LatCyclic += rollRatePID.Calculate(dt, LatCommand, AngularVelocity.x());
-			}
+            // Apply PID controllers
+            if (pitchRatePID != null) {
+                LongCyclic -= pitchRatePID.Calculate(dt, -LongCommand, AngularVelocity.y());
+            }
+            if (rollRatePID != null) {
+                LatCyclic += rollRatePID.Calculate(dt, LatCommand, AngularVelocity.x());
+            }
             if (verticalRateControl && verticalRatePID != null) {
                 if (IsOnGround) {
                     verticalRatePID.Reset();
@@ -203,34 +203,33 @@ namespace HeliSharp
                 Collective += verticalRatePID.Calculate(dt, CollectiveCommand, -HorizonVelocity.z());
             }
 
-		    var desiredPitchAngle = TrimAttitude.y();
-		    var desiredRollAngle = TrimAttitude.x();
-		    if (attitudeControl) {
+            var desiredPitchAngle = TrimAttitude.y();
+            var desiredRollAngle = TrimAttitude.x();
+            if (attitudeControl) {
                 desiredPitchAngle -= LongCommand * maxPitchAngle * Math.PI / 180.0;
                 desiredRollAngle += LatCommand * maxRollAngle * Math.PI / 180.0;
             }
-		    if (positionControl) {
-		        if (longitudinalPID != null) {
+            if (positionControl) {
+                if (longitudinalPID != null) {
                     if (IsOnGround || LongCommand > 1e-5 || Math.Abs(HorizonVelocity.x()) > positionResetVelocity) longitudinalPID.Reset();
-		            var longPositionOutput = longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x());
+                    LongPositionOutput = longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x());
                     // Longitudinal pitch bypass used for tiltrotor control
-                    if (LongitudinalPositionBypass)
-                        LongPositionOutput = longPositionOutput;
-                    else
-                        desiredPitchAngle -= longPositionOutput * maxPitchAngle * Math.PI / 180.0;
+                    desiredPitchAngle -= (1.0 - LongitudinalPositionBypass) * LongPositionOutput * maxPitchAngle * Math.PI / 180.0;
 
                 }
                 if (lateralPID != null) {
                     if (IsOnGround || LatCommand > 1e-5 || Math.Abs(HorizonVelocity.y()) > positionResetVelocity) lateralPID.Reset();
-		            desiredRollAngle += lateralPID.Calculate(dt, LatCommand, HorizonVelocity.y()) * maxRollAngle * Math.PI / 180.0;
-		        }
-		    }
-		    if (pitchPID != null) {
-		        LongCyclic -= pitchPID.Calculate(dt, desiredPitchAngle, Attitude.y());
-		    }
-		    if (rollPID != null) {
-		        LatCyclic += rollPID.Calculate(dt, desiredRollAngle, Attitude.x());
-		    }
+                    desiredRollAngle += lateralPID.Calculate(dt, LatCommand, HorizonVelocity.y()) * maxRollAngle * Math.PI / 180.0;
+                }
+            }
+            if (attitudeControl || positionControl) {
+                if (pitchPID != null) {
+                    LongCyclic -= pitchPID.Calculate(dt, desiredPitchAngle, Attitude.y());
+                }
+                if (rollPID != null) {
+                    LatCyclic += rollPID.Calculate(dt, desiredRollAngle, Attitude.x());
+                }
+            }
 
 		    if (Attitude != null && Math.Abs(Attitude.x()) < MAX_ROLL_FOR_YAW_CONTROL) {
 				double yawscale = 1.0;
