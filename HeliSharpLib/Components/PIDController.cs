@@ -24,6 +24,11 @@ namespace HeliSharp
 			return output;
 		}
 
+        public void Reset()
+        {
+            intsum = prev = 0.0;
+        }
+
 		private double limit(double val, double limit) {
 			if (val > limit) val = limit;
 			if (val < -limit) val = -limit;

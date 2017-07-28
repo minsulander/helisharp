@@ -86,6 +86,7 @@ namespace HeliSharp
 		public bool cyclicFlapping;					// Wether to allow cyclic flapping or not
 
 		public bool useDynamicInflow;			// Use the dynamic inflow model?
+        public bool useGroundEffectInflow = true;
 		public bool applyTorque;				// Apply rotor torque?
 
 	    // Calculation names of parameters above
@@ -116,7 +117,7 @@ namespace HeliSharp
 	    [NonSerialized]
 		private InflowModel inflow;
 		private double flapIterationTolerance = 1e-5;
-		private int maxFlapIterations = 50;
+		private int maxFlapIterations = 10;
 
 		[JsonIgnore]
 		public double RhoAOR2 { get { 
@@ -336,12 +337,12 @@ namespace HeliSharp
 				bool usingDynamicInflow = useDynamicInflow && Math.Abs (CT) > 1e-8;
 				if (usingDynamicInflow) {
 					if (trimflow) {
-						inflow.TrimDynamicInflow(mu_x, mu_z, beta_cosw, CT, R, HeightAboveGround);
+						inflow.TrimDynamicInflow(mu_x, mu_z, beta_cosw, CT, R);
 						trimflow = false;
 					}
-					inflow.EvaluateDynamicInflow(dt, mu_x, mu_z, beta_cosw, CT, R, HeightAboveGround, Omega, out lambda_i0, out xi, out E_x);
+					inflow.EvaluateDynamicInflow(dt, mu_x, mu_z, beta_cosw, CT, R, Omega, out lambda_i0, out xi, out E_x);
 				} else {
-					InflowModel.EvaluateInflow(mu_x, mu_z, beta_cosw, CT, R, HeightAboveGround, out lambda_i0, out xi, out E_x);
+					InflowModel.EvaluateInflow(mu_x, mu_z, beta_cosw, CT, R, useGroundEffectInflow ? HeightAboveGround : 1000.0, out lambda_i0, out xi, out E_x);
 				}
 
 				double b0b0=2.0*square(lambda_beta)/Gamma+(1.0/4.0*powi(R0,4)-1.0/3.0*e*powi(R0,3)+square(mu_x)*(1.0/4.0*square(R0)-1.0/2.0*e*R0))*theta_beta-(1.0/4.0*powi(B,4)-1.0/3.0*e*powi(B,3)+square(mu_x)*(1.0/4.0*square(B)-1.0/2.0*e*B))*theta_beta;
@@ -406,7 +407,7 @@ namespace HeliSharp
 
 				CT=-1.0/24.0*sigma*(-6.0*Omega*powi(B,2)*a*lambda_i0+4.0*Omega*powi(R0,3)*a*theta_0-3.0*a*k*Omega*powi(R0,4)+3.0*a*k*Omega*powi(B,4)-6.0*Omega*mu_x*R0*a*beta_cosw*e-6.0*Omega*powi(B,2)*a*theta_beta*beta_sinw*mu_x-3.0*Omega*powi(R0,2)*powi(mu_x,2)*a*k-6.0*Omega*powi(B,2)*a*theta_sinw*mu_x+6.0*Omega*powi(mu_x,2)*R0*cl0-6.0*Omega*powi(mu_x,2)*B*cl0-4.0*Omega*powi(B,3)*cl0+6.0*Omega*powi(R0,2)*a*theta_beta*beta_sinw*mu_x+6.0*Omega*powi(R0,2)*a*mu_z+6.0*Omega*mu_x*B*a*beta_cosw*e-6.0*Omega*powi(B,2)*a*mu_z+4.0*Omega*powi(R0,3)*cl0+6.0*Omega*powi(R0,2)*a*lambda_i0+6.0*Omega*powi(mu_x,2)*R0*a*theta_beta*beta_0+6.0*Omega*powi(mu_x,2)*R0*a*theta_0-6.0*Omega*powi(mu_x,2)*B*a*theta_0-6.0*Omega*powi(mu_x,2)*B*a*theta_beta*beta_0+6.0*Omega*powi(R0,2)*a*theta_sinw*mu_x+3.0*powi(R0,2)*a*p_w*mu_x+3.0*Omega*powi(B,2)*powi(mu_x,2)*a*k-3.0*powi(B,2)*a*p_w*mu_x+4.0*Omega*powi(R0,3)*a*theta_beta*beta_0-4.0*Omega*powi(B,3)*a*theta_0-4.0*Omega*powi(B,3)*a*theta_beta*beta_0)/Omega;
 
-				if (usingDynamicInflow && Math.Abs(lambda_i0) > 1e-5) {
+				if ((usingDynamicInflow || !useGroundEffectInflow) && Math.Abs(lambda_i0) > 1e-5) {
 					// Increase thrust due to ground effect (Padfield eq 3.218 pg 141 (2nd edition))
 					CT *= 1.0/(1.0-1.0/16.0*square(R/(HeightAboveGround))/(1.0+square(mu_x/lambda_i0)));
 					break;

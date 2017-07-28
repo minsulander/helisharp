@@ -23,6 +23,7 @@ namespace HeliSharp
 		public double yawDamperVelocity1, yawDamperVelocity2;
 	    public double collectiveNullZone, longNullZone, latNullZone, pedalNullZone;
 	    public double collectiveExpo = 1, longExpo = 1, latExpo = 1, pedalExpo = 1;
+        public double positionResetVelocity;
 
 		public PIDController pitchRatePID, rollRatePID, yawRatePID, verticalRatePID, pitchPID, rollPID, longitudinalPID, lateralPID;
 
@@ -53,6 +54,8 @@ namespace HeliSharp
 		public Vector<double> AngularVelocity { get; set; }
 		[JsonIgnore]
 		public Vector<double> Attitude { get; set; }
+        [JsonIgnore]
+        public bool IsOnGround { get; set; }
 
 		// Outputs
 		[JsonIgnore]
@@ -189,6 +192,10 @@ namespace HeliSharp
 				LatCyclic += rollRatePID.Calculate(dt, LatCommand, AngularVelocity.x());
 			}
             if (verticalRateControl && verticalRatePID != null) {
+                if (IsOnGround) {
+                    verticalRatePID.Reset();
+                    if (trimControl) CollectiveCommand -= 0.1;
+                }
                 Collective += verticalRatePID.Calculate(dt, CollectiveCommand, -HorizonVelocity.z());
             }
 
@@ -200,9 +207,11 @@ namespace HeliSharp
             }
 		    if (positionControl) {
 		        if (longitudinalPID != null) {
+                    if (IsOnGround || LongCommand > 1e-5 || Math.Abs(HorizonVelocity.x()) > positionResetVelocity) longitudinalPID.Reset();
 		            desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x()) * maxPitchAngle * Math.PI / 180.0;
 		        }
 		        if (lateralPID != null) {
+                    if (IsOnGround || LatCommand > 1e-5 || Math.Abs(HorizonVelocity.y()) > positionResetVelocity) lateralPID.Reset();
 		            desiredRollAngle += lateralPID.Calculate(dt, LatCommand, HorizonVelocity.y()) * maxRollAngle * Math.PI / 180.0;
 		        }
 		    }

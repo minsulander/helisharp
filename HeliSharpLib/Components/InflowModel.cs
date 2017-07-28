@@ -37,7 +37,7 @@ namespace HeliSharp
 		}
 
 		public void EvaluateDynamicInflow(double dt, double mu_x, double mu_z, double beta_cosw, double CT, 
-		                                  double R, double height, double Omega,
+		                                  double R, double Omega,
 		                                  out double lambda_i0, out double xi, out double E_x)
 		{
 			lambdabar = -mu_z + vbar + solver.State[0];
@@ -49,17 +49,17 @@ namespace HeliSharp
 			lambda_i0 = -(vbar+solver.State[0]);
 			if (lambda_i0 > 0) {
 				lambda_i0 = 0;
-				TrimDynamicInflow(mu_x, mu_z, beta_cosw, CT, R, height);
+				TrimDynamicInflow(mu_x, mu_z, beta_cosw, CT, R);
 			}
 			xi = calculateWakeSkew (mu_x, mu_z, beta_cosw, lambda_i0);
 			E_x=(15.0*Math.PI/32.0)*Math.Tan(xi/2.0); // Pitt&Peters choice of coefficients
 			// Ground effect reduction is done on CT in Rotor instead..
 		}
 
-		public void TrimDynamicInflow(double mu_x, double mu_z, double beta_cosw, double CT, double R, double height)
+		public void TrimDynamicInflow(double mu_x, double mu_z, double beta_cosw, double CT, double R)
 		{
 			double dummy;
-			EvaluateInflow(mu_x, mu_z, beta_cosw, CT, R, height, out vbar, out dummy, out dummy);
+			EvaluateInflow(mu_x, mu_z, beta_cosw, CT, R, 1000.0, out vbar, out dummy, out dummy);
 			Ct0 = CT;
 			mu = mu_x;
 			vbar = -vbar;
