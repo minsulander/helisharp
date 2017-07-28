@@ -26,7 +26,7 @@ namespace HeliSharp
 
         public void Reset()
         {
-            intsum = prev = 0.0;
+            intsum = 0.0;
         }
 
 		private double limit(double val, double limit) {
