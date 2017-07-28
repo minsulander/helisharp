@@ -56,6 +56,8 @@ namespace HeliSharp
 		public Vector<double> Attitude { get; set; }
         [JsonIgnore]
         public bool IsOnGround { get; set; }
+        [JsonIgnore]
+        public bool LongitudinalPositionBypass { get; set; }
 
 		// Outputs
 		[JsonIgnore]
@@ -75,6 +77,8 @@ namespace HeliSharp
 	    public double LatCommand { get; private set; }
 	    [JsonIgnore]
 	    public double PedalCommand { get; private set; }
+        [JsonIgnore]
+        public double LongPositionOutput { get; private set; }
 
 		public FlightControlSystem() {
 			TrimAttitude = Vector<double>.Build.Zero3();
@@ -208,9 +212,15 @@ namespace HeliSharp
 		    if (positionControl) {
 		        if (longitudinalPID != null) {
                     if (IsOnGround || LongCommand > 1e-5 || Math.Abs(HorizonVelocity.x()) > positionResetVelocity) longitudinalPID.Reset();
-		            desiredPitchAngle -= longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x()) * maxPitchAngle * Math.PI / 180.0;
-		        }
-		        if (lateralPID != null) {
+		            var longPositionOutput = longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x());
+                    // Longitudinal pitch bypass used for tiltrotor control
+                    if (LongitudinalPositionBypass)
+                        LongPositionOutput = longPositionOutput;
+                    else
+                        desiredPitchAngle -= longPositionOutput * maxPitchAngle * Math.PI / 180.0;
+
+                }
+                if (lateralPID != null) {
                     if (IsOnGround || LatCommand > 1e-5 || Math.Abs(HorizonVelocity.y()) > positionResetVelocity) lateralPID.Reset();
 		            desiredRollAngle += lateralPID.Calculate(dt, LatCommand, HorizonVelocity.y()) * maxRollAngle * Math.PI / 180.0;
 		        }
