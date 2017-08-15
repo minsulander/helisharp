@@ -16,14 +16,14 @@ namespace HeliSharp
 		public bool trimControl = true;
         public bool verticalRateControl = true;
         public bool attitudeControl = true;
-        public bool positionControl = true;
+        public bool lateralControl = true;
         public double maxPitchAngle = 30; // degrees
         public double maxRollAngle = 30; // degrees
 	    public double collectiveDirect = 1, longDirect = 1, latDirect = 1, pedalDirect = 1;
 		public double yawDamperVelocity1, yawDamperVelocity2;
 	    public double collectiveNullZone, longNullZone, latNullZone, pedalNullZone;
 	    public double collectiveExpo = 1, longExpo = 1, latExpo = 1, pedalExpo = 1;
-        public double positionResetVelocity;
+        public double lateralResetVelocity = 1;
 
 		public PIDController pitchRatePID, rollRatePID, yawRatePID, verticalRatePID, pitchPID, rollPID, longitudinalPID, lateralPID;
 
@@ -36,6 +36,8 @@ namespace HeliSharp
 		public double LatInput { get; set; } // positive right
 		[JsonIgnore]
 		public double PedalInput { get; set; } // positive right
+        [JsonIgnore]
+        public double DesiredSpeed { get; set; }
 		[JsonIgnore]
 		public double TrimCollective { get; set; }
 		[JsonIgnore]
@@ -209,20 +211,20 @@ namespace HeliSharp
                 desiredPitchAngle -= LongCommand * maxPitchAngle * Math.PI / 180.0;
                 desiredRollAngle += LatCommand * maxRollAngle * Math.PI / 180.0;
             }
-            if (positionControl) {
+            if (lateralControl) {
                 if (longitudinalPID != null) {
-                    if (IsOnGround || LongCommand > 1e-5 || Math.Abs(HorizonVelocity.x()) > positionResetVelocity) longitudinalPID.Reset();
-                    LongPositionOutput = longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x());
+                    if (IsOnGround || LongCommand > 1e-5 || Math.Abs(HorizonVelocity.x()) > lateralResetVelocity) longitudinalPID.Reset();
+                    LongPositionOutput = longitudinalPID.Calculate(dt, LongCommand, HorizonVelocity.x() - DesiredSpeed);
                     // Longitudinal pitch bypass used for tiltrotor control
                     desiredPitchAngle -= (1.0 - LongitudinalPositionBypass) * LongPositionOutput * maxPitchAngle * Math.PI / 180.0;
 
                 }
                 if (lateralPID != null) {
-                    if (IsOnGround || LatCommand > 1e-5 || Math.Abs(HorizonVelocity.y()) > positionResetVelocity) lateralPID.Reset();
+                    if (IsOnGround || LatCommand > 1e-5 || Math.Abs(HorizonVelocity.y()) > lateralResetVelocity) lateralPID.Reset();
                     desiredRollAngle += lateralPID.Calculate(dt, LatCommand, HorizonVelocity.y()) * maxRollAngle * Math.PI / 180.0;
                 }
             }
-            if (attitudeControl || positionControl) {
+            if (attitudeControl || lateralControl) {
                 if (pitchPID != null) {
                     LongCyclic -= pitchPID.Calculate(dt, desiredPitchAngle, Attitude.y());
                 }
