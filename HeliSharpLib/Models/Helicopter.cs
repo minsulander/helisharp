@@ -139,7 +139,7 @@ namespace HeliSharp
         [JsonProperty("inertia")]
         public double[] InertiaD
         {
-            get { return Inertia?.ToColumnWiseArray(); }
+            get { return Inertia?.AsColumnMajorArray(); }
             set { Inertia = Matrix<double>.Build.DenseOfColumnMajor(3, 3, value); }
         }
 

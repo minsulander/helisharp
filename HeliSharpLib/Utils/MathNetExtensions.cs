@@ -1,6 +1,5 @@
 using System;
 using MathNet.Numerics.LinearAlgebra;
-using System.Web.Script.Serialization;
 using System.Collections.Generic;
 
 namespace HeliSharp

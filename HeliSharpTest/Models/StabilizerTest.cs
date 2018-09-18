@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using System;
 using HeliSharp;
-using System.Web.Script.Serialization;
 
 namespace HeliSharp
 {
@@ -22,16 +21,9 @@ namespace HeliSharp
 		{
 			Stabilizer model = new Stabilizer().LoadDefaultHorizontal();
 
-			// One way to skin a cat...
-			var json = new JavaScriptSerializer().Serialize(model);
+			var json = Newtonsoft.Json.JsonConvert.SerializeObject(model);
 			Console.WriteLine(json);
-
-			// And another way...
-			/*
-			json = Newtonsoft.Json.JsonConvert.SerializeObject(rotor);
-			Console.WriteLine(json);
-			*/
 		}
-}
+	}
 }
 

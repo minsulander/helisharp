@@ -20,28 +20,24 @@ The above goals have some implications on the development and coding style:
 - Model states, inputs and outputs should be private variables or properties (so that they don't show up in the Unity Editor)
 - Variable names sometimes use the obfuscated math notation (i.e. greek letters), like Omega_0, in
   order to maintain the ability to cross-reference the code with reference literature. Their declaration should be
-  well commented. It's debatable whether this is a good thing... it's kind mutually exclusive with the
+  well commented. It's debatable whether this is a good thing... it's kinda mutually exclusive with the
   simplicity of Unity Editor parametrization.
 
 ## Dependencies
 
-The project should be able to compile with Microsoft Visual Studio, however that is not the original
-developer's preferred platform, so a lot of the development has been done with MonoDevelop/Xamarin Studio
-on Ubuntu Linux.
-
-```bash
-sudo apt install mono-complete nunit-console mono-reference-assemblies-2.0 octave
-```
-
-The project includes the following third-party DLLs:
-- MathNet - some version (not the latest) that worked with Unity
-- System.Threading - required by MathNet
-- [SaladLab's light version of the Newtonsoft Json.NET library](https://github.com/SaladLab/Json.Net.Unity3D) 
+[.NET Core](https://dot.net/core) 2.0
 
 ## Building and running
+
+```bash
+dotnet build
+cd HeliSharpTool/
+dotnet run
+```
 Run the tests within an IDE or on the command line:
 ```bash
-make test
+cd HeliSharpTest/
+dotnet test
 ```
 To build validation graphs, run:
 ```bash

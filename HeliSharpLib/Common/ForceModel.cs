@@ -1,7 +1,6 @@
 using System;
 using MathNet.Numerics.LinearAlgebra;
 using HeliSharp;
-using System.Web.Script.Serialization;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -50,7 +49,7 @@ namespace HeliSharp
 		// For serialization
 		[JsonProperty("rotation")]
 		public double[] RotationD {
-			get { return Rotation.ToColumnWiseArray(); }
+			get { return Rotation.AsColumnMajorArray(); }
 			set { Rotation = Matrix<double>.Build.DenseOfColumnMajor(3, 3, value); }
 		}
 

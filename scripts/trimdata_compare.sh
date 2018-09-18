@@ -1,6 +1,5 @@
 #!/bin/bash -e
-dir=$(dirname $0)
-mdtool build -p:HeliSharpTool
-HeliSharpTool/bin/Debug/HeliSharpTool.exe trim >$dir/../validation/a109/data/trimdata.csv
-cd $dir/octave
+cd $(dirname $0)/../HeliSharpTool
+dotnet run --no-build -- trim >../validation/a109/data/trimdata.csv
+cd ../scripts/octave
 octave -q trimdata_compare.m

@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using System;
 using HeliSharp;
-using System.Web.Script.Serialization;
 
 namespace HeliSharp
 {
