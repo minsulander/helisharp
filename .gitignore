@@ -1,3 +1,5 @@
+.vscode/
+
 UnityHeli/Assets/Plugins/CsHeliLib.dll
 UnityHeli/Assets/Plugins/MathNet.Numerics.dll
 UnityHeli/Assets/Plugins/Newtonsoft.Json.dll

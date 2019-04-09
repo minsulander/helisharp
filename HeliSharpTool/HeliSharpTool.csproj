@@ -6,12 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ManyConsole" Version="1.0.0.4" />
-    <PackageReference Include="NDesk.Options" Version="0.2.1" />
+    <ProjectReference Include="..\HeliSharpLib\HeliSharpLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HeliSharpLib\HeliSharpLib.csproj" />
+    <PackageReference Include="ManyConsole.CommandLineUtils" Version="1.0.3-alpha" />
   </ItemGroup>
 
 </Project>

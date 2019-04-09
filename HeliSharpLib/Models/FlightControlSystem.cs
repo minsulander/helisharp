@@ -5,86 +5,86 @@ using Newtonsoft.Json;
 
 namespace HeliSharp
 {
-	[Serializable]
-	public class FlightControlSystem
-	{
-		// Constants
-		public const double MAX_ROLL_FOR_YAW_CONTROL = 85.0 * Math.PI / 180.0;
+    [Serializable]
+    public class FlightControlSystem
+    {
+        // Constants
+        public const double MAX_ROLL_FOR_YAW_CONTROL = 85.0 * Math.PI / 180.0;
 
-		// Parameters
-		public bool enabled = true;
-		public bool trimControl = true;
+        // Parameters
+        public bool enabled = true;
+        public bool trimControl = true;
         public bool verticalRateControl = true;
         public bool attitudeControl = true;
         public bool lateralControl = true;
         public double maxPitchAngle = 30; // degrees
         public double maxRollAngle = 30; // degrees
-	    public double collectiveDirect = 1, longDirect = 1, latDirect = 1, pedalDirect = 1;
-		public double yawDamperVelocity1, yawDamperVelocity2;
-	    public double collectiveNullZone, longNullZone, latNullZone, pedalNullZone;
-	    public double collectiveExpo = 1, longExpo = 1, latExpo = 1, pedalExpo = 1;
+        public double collectiveDirect = 1, longDirect = 1, latDirect = 1, pedalDirect = 1;
+        public double yawDamperVelocity1, yawDamperVelocity2;
+        public double collectiveNullZone, longNullZone, latNullZone, pedalNullZone;
+        public double collectiveExpo = 1, longExpo = 1, latExpo = 1, pedalExpo = 1;
         public double lateralResetVelocity = 1;
 
-		public PIDController pitchRatePID, rollRatePID, yawRatePID, verticalRatePID, pitchPID, rollPID, longitudinalPID, lateralPID;
+        public PIDController pitchRatePID, rollRatePID, yawRatePID, verticalRatePID, pitchPID, rollPID, longitudinalPID, lateralPID;
 
-		// Inputs
-		[JsonIgnore]
-		public double CollectiveInput { get; set; } // positive up
-		[JsonIgnore]
-		public double LongInput { get; set; } // positive forward
-		[JsonIgnore]
-		public double LatInput { get; set; } // positive right
-		[JsonIgnore]
-		public double PedalInput { get; set; } // positive right
+        // Inputs
+        [JsonIgnore]
+        public double CollectiveInput { get; set; } // positive up
+        [JsonIgnore]
+        public double LongInput { get; set; } // positive forward
+        [JsonIgnore]
+        public double LatInput { get; set; } // positive right
+        [JsonIgnore]
+        public double PedalInput { get; set; } // positive right
         [JsonIgnore]
         public double DesiredSpeed { get; set; }
-		[JsonIgnore]
-		public double TrimCollective { get; set; }
-		[JsonIgnore]
-		public double TrimLongCyclic { get; set; }
-		[JsonIgnore]
-		public double TrimLatCyclic { get; set; }
-		[JsonIgnore]
-		public double TrimPedal { get; set; }
-		[JsonIgnore]
-		public Vector<double> TrimAttitude { get; set; }
-	    [JsonIgnore]
-	    public Vector<double> HorizonVelocity { get; set; }
-		[JsonIgnore]
-		public Vector<double> Velocity { get; set; }
-		[JsonIgnore]
-		public Vector<double> AngularVelocity { get; set; }
-		[JsonIgnore]
-		public Vector<double> Attitude { get; set; }
+        [JsonIgnore]
+        public double TrimCollective { get; set; }
+        [JsonIgnore]
+        public double TrimLongCyclic { get; set; }
+        [JsonIgnore]
+        public double TrimLatCyclic { get; set; }
+        [JsonIgnore]
+        public double TrimPedal { get; set; }
+        [JsonIgnore]
+        public Vector<double> TrimAttitude { get; set; }
+        [JsonIgnore]
+        public Vector<double> HorizonVelocity { get; set; }
+        [JsonIgnore]
+        public Vector<double> Velocity { get; set; }
+        [JsonIgnore]
+        public Vector<double> AngularVelocity { get; set; }
+        [JsonIgnore]
+        public Vector<double> Attitude { get; set; }
         [JsonIgnore]
         public bool IsOnGround { get; set; }
         [JsonIgnore]
         public double LongitudinalPositionBypass { get; set; }
 
-		// Outputs
-		[JsonIgnore]
-		public double Collective { get; private set; }
-		[JsonIgnore]
-		public double LongCyclic { get; private set; }
-		[JsonIgnore]
-		public double LatCyclic { get; private set; }
-		[JsonIgnore]
-		public double Pedal { get; private set; }
+        // Outputs
+        [JsonIgnore]
+        public double Collective { get; private set; }
+        [JsonIgnore]
+        public double LongCyclic { get; private set; }
+        [JsonIgnore]
+        public double LatCyclic { get; private set; }
+        [JsonIgnore]
+        public double Pedal { get; private set; }
 
-	    [JsonIgnore]
-	    public double CollectiveCommand { get; private set; }
-	    [JsonIgnore]
-	    public double LongCommand { get; private set; }
-	    [JsonIgnore]
-	    public double LatCommand { get; private set; }
-	    [JsonIgnore]
-	    public double PedalCommand { get; private set; }
+        [JsonIgnore]
+        public double CollectiveCommand { get; private set; }
+        [JsonIgnore]
+        public double LongCommand { get; private set; }
+        [JsonIgnore]
+        public double LatCommand { get; private set; }
+        [JsonIgnore]
+        public double PedalCommand { get; private set; }
         [JsonIgnore]
         public double LongPositionOutput { get; private set; }
 
-		public FlightControlSystem() {
-			TrimAttitude = Vector<double>.Build.Zero3();
-		}
+        public FlightControlSystem() {
+            TrimAttitude = Vector<double>.Build.Zero3();
+        }
 
         public FlightControlSystem LoadDefault() {
             pitchRatePID = new PIDController() {
@@ -149,10 +149,10 @@ namespace HeliSharp
                 integratorLimit = 1,
                 desiredScale = 10,
             };
-			yawDamperVelocity1 = 10.0;
-			yawDamperVelocity2 = 20.0;
-			return this;
-		}
+            yawDamperVelocity1 = 10.0;
+            yawDamperVelocity2 = 20.0;
+            return this;
+        }
 
         public void Update(double dt) {
             CollectiveCommand = CollectiveInput;
@@ -233,39 +233,39 @@ namespace HeliSharp
                 }
             }
 
-		    if (Attitude != null && Math.Abs(Attitude.x()) < MAX_ROLL_FOR_YAW_CONTROL) {
-				double yawscale = 1.0;
-				if (yawRatePID != null) {
-					// Gradually decrease yaw damper output with airspeed
-					if (yawDamperVelocity1 > 1e-5 && yawDamperVelocity2 > 1e-5) {
-						double v = Velocity.x();
-						if (v > yawDamperVelocity2)
-							yawscale = 0.0;
-						else if (v > yawDamperVelocity1)
-							yawscale = 1.0 - (v - yawDamperVelocity1) / (yawDamperVelocity2 - yawDamperVelocity1);
-					}
-					Pedal += yawscale * yawRatePID.Calculate(dt, PedalCommand, AngularVelocity.z());
-				}
-			}
+            if (Attitude != null && Math.Abs(Attitude.x()) < MAX_ROLL_FOR_YAW_CONTROL) {
+                double yawscale = 1.0;
+                if (yawRatePID != null) {
+                    // Gradually decrease yaw damper output with airspeed
+                    if (yawDamperVelocity1 > 1e-5 && yawDamperVelocity2 > 1e-5) {
+                        double v = Velocity.x();
+                        if (v > yawDamperVelocity2)
+                            yawscale = 0.0;
+                        else if (v > yawDamperVelocity1)
+                            yawscale = 1.0 - (v - yawDamperVelocity1) / (yawDamperVelocity2 - yawDamperVelocity1);
+                    }
+                    Pedal += yawscale * yawRatePID.Calculate(dt, PedalCommand, AngularVelocity.z());
+                }
+            }
 
-		    if (trimControl) {
-		        Collective = TrimCollective + Collective * (1 - Math.Sign(Collective) * Math.Sign(TrimCollective) * Math.Abs(TrimCollective));
-		        LongCyclic = TrimLongCyclic + LongCyclic * (1 - Math.Sign(LongCyclic) * Math.Sign(TrimLongCyclic) * Math.Abs(TrimLongCyclic));
-		        LatCyclic = TrimLatCyclic + LatCyclic * (1 - Math.Sign(LatCyclic) * Math.Sign(TrimLatCyclic) * Math.Abs(TrimLatCyclic));
-		        Pedal = TrimPedal + Pedal * (1 - Math.Sign(Pedal) * Math.Sign(TrimPedal) * Math.Abs(TrimPedal));
-		    }
+            if (trimControl) {
+                Collective = TrimCollective + Collective * (1 - Math.Sign(Collective) * Math.Sign(TrimCollective) * Math.Abs(TrimCollective));
+                LongCyclic = TrimLongCyclic + LongCyclic * (1 - Math.Sign(LongCyclic) * Math.Sign(TrimLongCyclic) * Math.Abs(TrimLongCyclic));
+                LatCyclic = TrimLatCyclic + LatCyclic * (1 - Math.Sign(LatCyclic) * Math.Sign(TrimLatCyclic) * Math.Abs(TrimLatCyclic));
+                Pedal = TrimPedal + Pedal * (1 - Math.Sign(Pedal) * Math.Sign(TrimPedal) * Math.Abs(TrimPedal));
+            }
 
-		    Collective = limit(Collective, 1);
-			LongCyclic = limit(LongCyclic, 1);
-			LatCyclic = limit(LatCyclic, 1);
-			Pedal = limit(Pedal, 1);
-		}
+            Collective = limit(Collective, 1);
+            LongCyclic = limit(LongCyclic, 1);
+            LatCyclic = limit(LatCyclic, 1);
+            Pedal = limit(Pedal, 1);
+        }
 
-		private double limit(double val, double limit) {
-			if (val > limit) val = limit;
-			if (val < -limit) val = -limit;
-			return val;
-		}
+        private double limit(double val, double limit) {
+            if (val > limit) val = limit;
+            if (val < -limit) val = -limit;
+            return val;
+        }
 }
 }
 
